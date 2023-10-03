@@ -13,7 +13,7 @@ int main (void){
     zmq_bind (backend, "tcp://127.0.0.1:5555");
 
     //  Run the proxy until the user interrupts us
-    zmq_proxy (frontend, backend);
+    zmq_proxy (frontend, backend, NULL);
 
     // Close sockets and terminate context
     zmq_close (frontend);

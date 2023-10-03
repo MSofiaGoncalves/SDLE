@@ -9,16 +9,16 @@ int main(int argc, char *argv[])
     //  Socket to talk to server
     printf("Collecting updates from weather server...\n");
     void *context = zmq_ctx_new();
-    printf("created a new context");
+    printf("created a new context\n");
     int rc;
     void *subscriberUS = zmq_socket(context, ZMQ_SUB);
-    printf("after subscriberUS");
-    rc = zmq_connect(subscriberUS, "tcp://127.0.0.1:5556");
-    printf("before assertion");
+    printf("after subscriberUS\n");
+    rc = zmq_connect(subscriberUS, "tcp://127.0.0.1:5555");
+    printf("before assertion\n");
     assert(rc == 0);
-    printf("has connected to the port");
+    printf("has connected to the port\n");
     //  Subscribe to zipcode, default is NYC, 10001
-    const char *filter = (argc > 1) ? argv[1] : "10001 ";
+    const char *filter = (argc > 1) ? argv[1] : "10001";
     rc = zmq_setsockopt(subscriberUS, ZMQ_SUBSCRIBE,
                         filter, strlen(filter));
     assert(rc == 0);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     while (update_nbrUS < 100 && update_nbrPT < 100)
     {
 
-        zmq_poll(items, 2, -1);
+        zmq_poll(items, 1, -1);
         if (items[0].revents & ZMQ_POLLIN)
         {
             char msg[256];
