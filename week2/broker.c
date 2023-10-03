@@ -11,11 +11,14 @@ int main (void)
     zmq_bind (frontend, "tcp://*:5559");
     zmq_bind (backend,  "tcp://*:5560");
 
-    //  Initialize poll set
+    zmq_proxy (frontend, backend, NULL);
+
+    /*//  Initialize poll set
     zmq_pollitem_t items [] = {
             { frontend, 0, ZMQ_POLLIN, 0 },
             { backend,  0, ZMQ_POLLIN, 0 }
     };
+
     //  Switch messages between sockets
     while (1) {
         zmq_msg_t message;
@@ -44,7 +47,7 @@ int main (void)
                     break;      //  Last message part
             }
         }
-    }
+    }*/
     //  We never get here, but clean up anyhow
     zmq_close (frontend);
     zmq_close (backend);

@@ -10,7 +10,7 @@ int main (void)
 
     //  Socket to talk to server
     void *requester = zmq_socket (context, ZMQ_REQ);
-    zmq_connect (requester, "tcp://localhost:5559");
+    zmq_connect (requester, "tcp://*:5559");
 
     int request_nbr;
     for (request_nbr = 0; request_nbr != 10; request_nbr++) {
