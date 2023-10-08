@@ -11,11 +11,31 @@ int main (void)
     void *context = zmq_ctx_new();
 
     void *publisherUS = zmq_socket (context, ZMQ_PUB);
-    int rc = zmq_bind (publisherUS, "tcp://127.0.0.1:5555");
+    int rc = zmq_bind (publisherUS, "tcp://*:5558");
     assert (rc == 0);
-    /*void *publisherPT = zmq_socket (context, ZMQ_PUB);
-    rc = zmq_bind (publisherPT, "tcp://localhost:5558");
-    assert (rc == 0);*/
+    void *publisherPT = zmq_socket (context, ZMQ_PUB);
+    rc = zmq_bind (publisherPT, "tcp://*:5557");
+    assert (rc == 0);
+
+    while(1){
+
+        zmq_pollitem_t items[] = {
+                {publisherUS, 0, ZMQ_POLLIN, 0},
+                {publisherPT, 0, ZMQ_POLLIN, 0}
+        };
+
+        zmq_poll(items, 2, -1);
+
+        if(items[0].revents & ZMQ_POLLIN){
+            rc = zmq_bind(publisherUS, "tcp://*5556");
+        } else if(items[1].revents & ZMQ_POLLIN){
+            rc = zmq_bind(publisherPT, "tcp://*5556");
+        }
+
+    }
+
+
+
 
     //  Initialize random number generator
     srandom ((unsigned) time (NULL));
@@ -32,7 +52,7 @@ int main (void)
         s_send (publisherUS, update);
 
         ////////////////*************************///////////////////
-/*
+
         //  Get values that will fool the boss
         zipcode     = randof (10000);
         temperature = randof (215) - 80;
@@ -41,13 +61,13 @@ int main (void)
         //  Send message to all subscribers
         char updatePT [20];
         sprintf (updatePT, "%04d %d %d", zipcode, temperature, relhumidity);
-        //printf("%s\n", updatePT);
-        s_send (publisherPT, updatePT);*/
+        printf("%s\n", updatePT);
+        s_send (publisherPT, updatePT);
     }
 
 
     zmq_close (publisherUS);
-    //zmq_close (publisherPT);
+    zmq_close (publisherPT);
     zmq_ctx_destroy (context);
     return 0;
 }

@@ -6,14 +6,14 @@ int main (void){
 
     //  This is where the weather server sits
     void *frontend = zmq_socket(context, ZMQ_XSUB);
-    zmq_connect (frontend, "tcp://127.0.0.1:5556");
+    zmq_connect (frontend, "tcp://localhost:5557");
 
     //  This is our public endpoint for subscribers
     void *backend = zmq_socket(context, ZMQ_XPUB);
-    zmq_bind (backend, "tcp://127.0.0.1:5555");
+    zmq_bind (backend, "tcp://*:5555");
 
     //  Run the proxy until the user interrupts us
-    zmq_proxy (frontend, backend);
+    zmq_proxy (frontend, backend, NULL);
 
     // Close sockets and terminate context
     zmq_close (frontend);

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     int rc;
     void *subscriberUS = zmq_socket(context, ZMQ_SUB);
     printf("after subscriberUS");
-    rc = zmq_connect(subscriberUS, "tcp://127.0.0.1:5556");
+    rc = zmq_connect(subscriberUS, "tcp://localhost:5555");
     printf("before assertion");
     assert(rc == 0);
     printf("has connected to the port");
@@ -23,18 +23,18 @@ int main(int argc, char *argv[])
                         filter, strlen(filter));
     assert(rc == 0);
 
-    /*void *subscriberPT = zmq_socket(context, ZMQ_SUB);
-    rc = zmq_connect(subscriberPT, "tcp://localhost:5559");
+    void *subscriberPT = zmq_socket(context, ZMQ_SUB);
+    rc = zmq_connect(subscriberPT, "tcp://localhost:5555");
     assert(rc == 0);
     //  Subscribe to zipcode, default is NYC, 10001
     const char *filterPT = (argc > 1) ? argv[1] : "4555 ";
     rc = zmq_setsockopt(subscriberPT, ZMQ_SUBSCRIBE,
                         filterPT, strlen(filterPT));
-    assert(rc == 0);*/
+    assert(rc == 0);
 
     zmq_pollitem_t items[] = {
         {subscriberUS, 0, ZMQ_POLLIN, 0},
-        //{subscriberPT, 0, ZMQ_POLLIN, 0}
+        {subscriberPT, 0, ZMQ_POLLIN, 0}
         };
 
     long total_tempUS = 0;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             // free(msg);
             update_nbrUS++;
         }
-        /*if (items[1].revents & ZMQ_POLLIN)
+        if (items[1].revents & ZMQ_POLLIN)
         {
             char msg[256];
             int size = zmq_recv(subscriberPT, msg, 255, 0);
@@ -75,17 +75,17 @@ int main(int argc, char *argv[])
             }
             // free(msg);
             update_nbrPT++;
-        }*/
+        }
     }
     if (update_nbrUS != 0)
         printf("Average temperature for zipcode '%s' was %dF\n",
                filter, (int)(total_tempUS / update_nbrUS));
-    /*if (update_nbrPT != 0)
+    if (update_nbrPT != 0)
         printf("Average temperature for zipcode '%s' was %dF\n",
-               filterPT, (int)(total_tempPT / update_nbrPT));*/
+               filterPT, (int)(total_tempPT / update_nbrPT));
 
     zmq_close(subscriberUS);
-    //zmq_close(subscriberPT);
+    zmq_close(subscriberPT);
     zmq_ctx_destroy(context);
     return 0;
 }
