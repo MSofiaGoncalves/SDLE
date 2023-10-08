@@ -11,7 +11,9 @@ int main (void)
     void *context = zmq_ctx_new();
 
     void *publisherUS = zmq_socket (context, ZMQ_PUB);
+
     int rc = zmq_bind (publisherUS, "tcp://*:5558");
+
     assert (rc == 0);
     void *publisherPT = zmq_socket (context, ZMQ_PUB);
     rc = zmq_bind (publisherPT, "tcp://*:5557");
