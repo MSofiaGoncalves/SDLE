@@ -12,10 +12,10 @@ int main(int argc, char *argv[])
     printf("created a new context\n");
     int rc;
     void *subscriberUS = zmq_socket(context, ZMQ_SUB);
-<<<<<<< HEAD
-    printf("after subscriberUS");
+
+    printf("after subscriberUS\n");
     rc = zmq_connect(subscriberUS, "tcp://localhost:5555");
-    printf("before assertion");
+    printf("before assertion\n");
 
     assert(rc == 0);
     printf("has connected to the port\n");

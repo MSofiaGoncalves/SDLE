@@ -9,15 +9,18 @@ int main (void)
 
     //  Prepare our context and publisher
     void *context = zmq_ctx_new();
+    printf("Tem context\n");
 
     void *publisherUS = zmq_socket (context, ZMQ_PUB);
+    printf("publisherUS feito\n");
 
-    int rc = zmq_bind (publisherUS, "tcp://*:5558");
+    //int rc = zmq_bind (publisherUS, "tcp://*:5558");
 
-    assert (rc == 0);
+    //assert (rc == 0);
     void *publisherPT = zmq_socket (context, ZMQ_PUB);
-    rc = zmq_bind (publisherPT, "tcp://*:5557");
-    assert (rc == 0);
+    printf("publisherPT feito\n");
+    //rc = zmq_bind (publisherPT, "tcp://*:5557");
+    //assert (rc == 0);
 
     while(1){
 
@@ -25,23 +28,39 @@ int main (void)
                 {publisherUS, 0, ZMQ_POLLIN, 0},
                 {publisherPT, 0, ZMQ_POLLIN, 0}
         };
+        printf("polled the items\n");
 
-        zmq_poll(items, 2, -1);
+        //está a ficar preso aqui
+        int rc = zmq_poll(items, 2, -1);
+
+        printf("rc: %d\n", rc);
+
+        assert(rc == 0);
+
+        printf("revents 0: %hd\n", items[0].revents);
+        printf("revents 1: %hd\n", items[1].revents);
 
         if(items[0].revents & ZMQ_POLLIN){
             rc = zmq_bind(publisherUS, "tcp://*5556");
+            printf("Deu bind ao US\n");
+            assert (rc == 0);
         } else if(items[1].revents & ZMQ_POLLIN){
             rc = zmq_bind(publisherPT, "tcp://*5556");
+            printf("Deu bind ao PT\n");
+            assert (rc == 0);
         }
 
-    }
+        printf("depois do if else\n");
+
+    //}
+
 
 
 
 
     //  Initialize random number generator
-    srandom ((unsigned) time (NULL));
-    while (1) {
+        srandom ((unsigned) time (NULL));
+    //while (1) {
         //  Get values that will fool the boss
         int zipcode, temperature, relhumidity;
         zipcode     = randof (100000);
