@@ -2,28 +2,33 @@ package states;
 
 import java.util.Scanner;
 
-public class CreateListState implements State {
+public class HubState implements State {
     public State step() {
         breakLn();
-        printTitle("Create List");
-        System.out.println("This is the create list page. \n\n");
+        printTitle("Menu");
 
-        System.out.println("\t1) Go back");
+        System.out.println("\n\t1) Create List");
+        System.out.println("\t2) Open List");
+        System.out.println("\t3) View Lists");
         System.out.println("\t0) Exit");
 
         Scanner in = new Scanner(System.in);
         String option = in.nextLine();
-        while (!(option.matches("[0-1]"))) {
+        while (!(option.matches("[0-4]"))) {
             System.out.println("Invalid option");
             option = in.nextLine();
         }
+
         switch (option) {
             case "1":
-                return new HubState();
+                return new CreateListState();
+            case "2":
+                return new ListState();
+            case "3":
+                return new ListingState();
             case "0":
                 return null;
         }
-
         return null;
     }
 }

@@ -20,6 +20,7 @@ public interface State {
     }
 
     default void breakLn() {
+        for (int i = 0; i < 50; i++) System.out.print("\n");
         try {
             if (System.getProperty("os.name").contains("Windows")) {
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
@@ -27,7 +28,6 @@ public interface State {
                 new ProcessBuilder("bash", "-c", "clear").inheritIO().start().waitFor();
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             for (int i = 0; i < 50; i++) System.out.print("\n");
         }
     }
