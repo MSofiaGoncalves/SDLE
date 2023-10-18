@@ -4,6 +4,7 @@ import model.ShoppingList;
 import utils.TablePrinter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -14,7 +15,7 @@ public class ListingState implements State {
 
         List<ShoppingList> lists = client.Session.getSession().getLists();
 
-        if (lists.size() == 0) {
+        if (lists.isEmpty()) {
             System.out.println("\nYou don't have any lists yet!");
         }
         else {
@@ -26,22 +27,6 @@ public class ListingState implements State {
             TablePrinter.printTable(table);
         }
 
-        System.out.println("\n\t1) Go back");
-        System.out.println("\t0) Exit");
-
-        Scanner in = new Scanner(System.in);
-        String option = in.nextLine();
-        while (!(option.matches("[0-1]"))) {
-            System.out.println("Invalid option");
-            option = in.nextLine();
-        }
-
-        switch (option) {
-            case "1":
-                return new HubState();
-            case "0":
-                return null;
-        }
-        return null;
+        return displayOptions(List.of("Go back", "Exit"), new ArrayList<>(Arrays.asList(new HubState(), null)));
     }
 }
