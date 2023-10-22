@@ -1,5 +1,6 @@
 package model;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,34 +18,42 @@ public class ShoppingList {
     public ShoppingList(String id, String name) {
         this.id = id;
         this.name = name;
+        this.products = new HashMap<>();
     }
 
     public String getId() {
-    	return this.id;
+        return this.id;
     }
 
     public String getName() {
-    	return this.name;
+        return this.name;
     }
 
     public Map<String, Integer> getProducts() {
         return products;
     }
 
-    public void addProduct(String name, Integer quantity){
-        products.put(name, quantity);
+    public void addProduct(String name, int quantity) {
+        if (products.containsKey(name)) {
+            System.out.println("exists");
+            addQuantity(name, quantity);
+        } else {
+            products.put(name, quantity);
+        }
     }
 
-    public void removeProduct(String name, Integer quantity){
+    public void removeProduct(String name, int quantity) {
         products.remove(name);
     }
 
-    public void addQuantity(String name, Integer quantity){
+    public void addQuantity(String name, int quantity) {
         Integer currQuantity = products.get(name);
-        products.put(name, currQuantity+quantity);
+        System.out.println("Cur quantity: " + currQuantity);
+        System.out.println("New quantity: " + (currQuantity + quantity));
+        products.put(name, currQuantity + quantity);
     }
 
-    public void removeQuantity(String name, Integer quantity){
+    public void removeQuantity(String name, int quantity) {
         Integer currQuantity = products.get(name);
         if (currQuantity - quantity > 1) {
             products.put(name, currQuantity - quantity);
@@ -53,7 +62,19 @@ public class ShoppingList {
         }
     }
 
-    public JSONObject toJSonObject(){
+    public void printProducts() {
+        System.out.println("\t* Product: Quantity ");
+        for (Map.Entry<String, Integer> entry : products.entrySet()) {
+            System.out.println("\t" + entry.getKey() + ": " + entry.getValue());
+        }
+        System.out.println("\n");
+    }
+
+    public Boolean hasProducts() {
+        return this.products.size() != 0;
+    }
+
+    public JSONObject toJSonObject() {
         JSONObject shoppingListJson = new JSONObject();
         shoppingListJson.put("name", name);
         shoppingListJson.put("id", id);
@@ -71,7 +92,7 @@ public class ShoppingList {
     }
 
     public void saveToFile() {
-        String fileName = name + ".json";
+        String fileName = "client/lists/" + id + ".json";
         JSONObject jsonObject = toJSonObject();
 
         try (FileWriter file = new FileWriter(fileName)) {

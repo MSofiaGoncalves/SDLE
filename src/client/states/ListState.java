@@ -31,6 +31,10 @@ public class ListState implements State {
 
         System.out.println("This is the view list page. \n\n");
 
-        return displayOptions(List.of("Go back", "Exit"), new ArrayList<>(Arrays.asList(new HubState(), null)));
+        if(this.shoppingList.hasProducts()){
+            this.shoppingList.printProducts();
+        }
+
+        return displayOptions(List.of("Add item", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new HubState(), null)));
     }
 }

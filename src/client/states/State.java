@@ -23,6 +23,11 @@ public interface State {
         System.out.print("\n");
     }
 
+    default void printLine(String message){
+        System.out.print("\n");
+        System.out.println("\t* " + message);
+    }
+
     default void breakLn() {
         for (int i = 0; i < 50; i++) System.out.print("\n");
         try {

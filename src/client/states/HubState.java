@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class HubState implements State {
+public class  HubState implements State {
     public State step() {
         breakLn();
         printTitle("Menu");

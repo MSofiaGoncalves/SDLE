@@ -14,6 +14,7 @@ public class CreateListState implements State {
         String name = in.nextLine();
 
         ShoppingList shoppingList = client.Session.getSession().createList(name);
+        shoppingList.saveToFile();
 
         return new ListState(shoppingList);
     }
