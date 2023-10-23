@@ -1,11 +1,14 @@
 package model;
 
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,6 +23,13 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
     }
+
+    public ShoppingList(String id, String name, Map<String, Integer> products) {
+        this.id = id;
+        this.name = name;
+        this.products = products;
+    }
+
 
     public String getId() {
         return this.id;
@@ -104,4 +114,34 @@ public class ShoppingList {
     }
 
     // TODO: Function that reads from json file
+    public static ShoppingList loadFromFile(String fileName){
+        System.out.println(fileName);
+        JSONParser parser = new JSONParser();
+        //String fileDirectory = "client/lists/" + fileName;
+
+        try (FileReader reader = new FileReader(fileName)) {
+            JSONObject jsonShoppingList = (JSONObject) parser.parse(reader);
+
+            String listID = (String) jsonShoppingList.get("id");
+            String name = (String) jsonShoppingList.get("name");
+
+            Map<String, Integer> fileProducts = new HashMap<>();
+            JSONArray productsArray = (JSONArray) jsonShoppingList.get("products");
+            for (Object product : productsArray) {
+                JSONObject productJson = (JSONObject) product;
+                String productName = (String) productJson.get("name");
+                System.out.println(productName);
+                long productQuantity = (long) productJson.get("quantity");
+                //productJson.
+                fileProducts.put(productName, (int) productQuantity);
+            }
+
+            return new ShoppingList(name, listID, fileProducts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 }

@@ -2,6 +2,7 @@ package client;
 
 import model.ShoppingList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,8 @@ public class Session {
     private static Session instance;
 
     private Session() {
-        lists = new HashMap<>();
+        System.out.println("constructor");
+        lists = loadListsFromFiles();
     }
 
     /**
@@ -32,7 +34,35 @@ public class Session {
         return this.lists.get(id);
     }
 
+    public HashMap<String, ShoppingList> loadListsFromFiles(){
+        HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
+        File folder = new File("client/lists");
+        System.out.println("folder: " + folder);
+
+        if (folder.exists() && folder.isDirectory()) {
+            System.out.println("exists");
+
+            File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+            System.out.println("files: " + files);
+
+
+            if (files != null) {
+                for (File file : files) {
+                    ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
+                    System.out.println("AAAAAAAAA");
+                    System.out.println("list id: " + list.getId());
+
+                    if (list != null) {
+                        shoppingLists.put(list.getId(), list);
+                    }
+                }
+            }
+        }
+        return shoppingLists;
+    }
+
     public List<ShoppingList> getLists() {
+        System.out.println("getlists");
         return new ArrayList<>(this.lists.values());
     }
 
