@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -8,6 +9,9 @@
     </option>
   </component>
   <component name="ProjectRootManager">
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="17" project-jdk-type="JavaSDK">
+>>>>>>> 83347db880b43081812961ba533c61e912b35837
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
