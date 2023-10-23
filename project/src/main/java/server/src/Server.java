@@ -1,4 +1,4 @@
-package jeromq;
+package server.src;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
@@ -26,5 +26,6 @@ public class Server
                 socket.send(response.getBytes(ZMQ.CHARSET), 0);
             }
         }
+        System.out.println("Server started");
     }
 }
