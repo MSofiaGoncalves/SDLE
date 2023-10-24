@@ -2,11 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.iml" filepath="$PROJECT_DIR$/.idea/modules/project.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.main.iml" filepath="$PROJECT_DIR$/.idea/modules/project.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.test.iml" filepath="$PROJECT_DIR$/.idea/modules/project.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/server/server.iml" filepath="$PROJECT_DIR$/server/server.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/SDLE.iml" filepath="$PROJECT_DIR$/.idea/SDLE.iml" />
+>>>>>>> bf93317ee8e64ea0ce0ec832e5237f738dea1e3c
     </modules>
   </component>
 </project>
