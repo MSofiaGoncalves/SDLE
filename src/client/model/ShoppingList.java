@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+//import org.json.simple.JSONArray;
+//import org.json.simple.JSONObject;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -74,34 +74,34 @@ public class ShoppingList {
         return this.products.size() != 0;
     }
 
-    public JSONObject toJSonObject() {
-        JSONObject shoppingListJson = new JSONObject();
-        shoppingListJson.put("name", name);
-        shoppingListJson.put("id", id);
-
-        JSONArray productsArray = new JSONArray();
-        for (Map.Entry<String, Integer> entry : products.entrySet()) {
-            JSONObject productJson = new JSONObject();
-            productJson.put("name", entry.getKey());
-            productJson.put("quantity", entry.getValue());
-            productsArray.add(productJson);
-        }
-
-        shoppingListJson.put("products", productsArray);
-        return shoppingListJson;
-    }
-
-    public void saveToFile() {
-        String fileName = "client/lists/" + id + ".json";
-        JSONObject jsonObject = toJSonObject();
-
-        try (FileWriter file = new FileWriter(fileName)) {
-            file.write(jsonObject.toJSONString());
-            System.out.println("Shopping list has been written to " + fileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public JSONObject toJSonObject() {
+//        JSONObject shoppingListJson = new JSONObject();
+//        shoppingListJson.put("name", name);
+//        shoppingListJson.put("id", id);
+//
+//        JSONArray productsArray = new JSONArray();
+//        for (Map.Entry<String, Integer> entry : products.entrySet()) {
+//            JSONObject productJson = new JSONObject();
+//            productJson.put("name", entry.getKey());
+//            productJson.put("quantity", entry.getValue());
+//            productsArray.add(productJson);
+//        }
+//
+//        shoppingListJson.put("products", productsArray);
+//        return shoppingListJson;
+//    }
+//
+//    public void saveToFile() {
+//        String fileName = "client/lists/" + id + ".json";
+//        JSONObject jsonObject = toJSonObject();
+//
+//        try (FileWriter file = new FileWriter(fileName)) {
+//            file.write(jsonObject.toJSONString());
+//            System.out.println("Shopping list has been written to " + fileName);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     // TODO: Function that reads from json file
 }

@@ -31,7 +31,7 @@ public class AddProductState implements State {
         Integer quantity = in.nextInt();
 
         this.shoppingList.addProduct(name, quantity);
-        this.shoppingList.saveToFile();
+//        this.shoppingList.saveToFile();
 
         return displayOptions(List.of("Add another item", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new ListState(this.shoppingList), null)));
     }
