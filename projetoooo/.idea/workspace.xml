@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8eb7673d-c1e8-48e0-a7ff-bad6427796f8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/Session.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/lists/3fafabf1-af81-4aaa-99ec-2f56060cfbe0.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/model/ShoppingList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/AddProductState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/CreateListState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/HubState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/ListState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/ListingState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/states/State.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/client/utils/TablePrinter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/server/src/Server.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.idea/src.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/a.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/Session.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/client.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/lists/3fafabf1-af81-4aaa-99ec-2f56060cfbe0.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/model/ShoppingList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/AddProductState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/CreateListState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/HubState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/ListState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/ListingState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/states/State.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/client/utils/TablePrinter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/src/main/java/org/example/App.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/projectSDLE/src/test/java/org/example/AppTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/server/server.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/server/src/Server.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/server/src/ZHelper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/zguide" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2XA0DcLXeBgYNgQeVdG6zG3LwVd" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/sofiagoncalves/Desktop/Mestrado/1º ano/Sistemas Distribuídos de Larga Escala/SDLE/projetoooo&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/client" />
+      <recent name="$PROJECT_DIR$/src/main/java" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.client.Client">
+    <configuration name="Server" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="server.src.Server" />
+      <module name="projetoooo.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="server.src.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="client.Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <envs>
+        <env name="TERM" value="xterm" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="client.Client" />
+      <module name="projetoooo.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="client.src.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GroovyScriptRunConfiguration" factoryName="Groovy">
+      <setting name="path" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workDir" value="file://$PROJECT_DIR$" />
+      <setting name="debug" value="false" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.client.Client" />
+      <item itemvalue="Application.Server" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.client.Client" />
+        <item itemvalue="Application.Server" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8eb7673d-c1e8-48e0-a7ff-bad6427796f8" name="Changes" comment="" />
+      <created>1698056460864</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1698056460864</updated>
+    </task>
+    <servers />
+  </component>
+</project>
