@@ -107,7 +107,7 @@ public class ShoppingList {
 //    }
 
     // TODO: Function that reads from json file
-    public static ShoppingList loadFromFile(String fileName){
+//    public static ShoppingList loadFromFile(String fileName){
 //        System.out.println(fileName);
 //        JSONParser parser = new JSONParser();
 //        //String fileDirectory = "client/lists/" + fileName;
@@ -136,18 +136,18 @@ public class ShoppingList {
 //            throw new RuntimeException(e);
 //        }
 //        return null;
-
-        try (Reader reader = new FileReader(fileName)) {
-            // Create a Gson object
-            Gson gson = new Gson();
-
-            // Parse the JSON file into a ShoppingList object
-            ShoppingList shoppingList = gson.fromJson(reader, ShoppingList.class);
-
-            return shoppingList;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//-------------
+//        try (Reader reader = new FileReader(fileName)) {
+//            // Create a Gson object
+//            Gson gson = new Gson();
+//
+//            // Parse the JSON file into a ShoppingList object
+//            ShoppingList shoppingList = gson.fromJson(reader, ShoppingList.class);
+//
+//            return shoppingList;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 }

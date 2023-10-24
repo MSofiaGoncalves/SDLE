@@ -14,8 +14,8 @@ public class Session {
 
     private Session() {
         System.out.println("constructor");
-//        lists = new HashMap<>();
-        lists = loadListsFromFiles();
+        lists = new HashMap<>();
+//        lists = loadListsFromFiles();
     }
 
     /**
@@ -35,36 +35,36 @@ public class Session {
         return this.lists.get(id);
     }
 
-    public HashMap<String, ShoppingList> loadListsFromFiles(){
-        HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
-        File folder = new File("src/main/java/project/client/lists");
-        System.out.println("folder: " + folder);
-
-        if (folder.exists() && folder.isDirectory()) {
-            System.out.println("exists");
-
-            File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
-            System.out.println("files: " + files);
-
-
-            if (files != null) {
-                System.out.println("nt null");
-                for (File file : files) {
-                    ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
-                    System.out.println("AAAAAAAAA");
-                    System.out.println("list id: " + list.getId());
-
-                    if (list != null) {
-                        shoppingLists.put(list.getId(), list);
-                    }
-                }
-            }
-            else{
-                System.out.println("no files!");
-            }
-        }
-        return shoppingLists;
-    }
+//    public HashMap<String, ShoppingList> loadListsFromFiles(){
+//        HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
+//        File folder = new File("src/main/java/project/client/lists");
+//        System.out.println("folder: " + folder);
+//
+//        if (folder.exists() && folder.isDirectory()) {
+//            System.out.println("exists");
+//
+//            File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+//            System.out.println("files: " + files);
+//
+//
+//            if (files != null) {
+//                System.out.println("nt null");
+//                for (File file : files) {
+//                    ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
+//                    System.out.println("AAAAAAAAA");
+//                    System.out.println("list id: " + list.getId());
+//
+//                    if (list != null) {
+//                        shoppingLists.put(list.getId(), list);
+//                    }
+//                }
+//            }
+//            else{
+//                System.out.println("no files!");
+//            }
+//        }
+//        return shoppingLists;
+//    }
 
     public List<ShoppingList> getLists() {
         System.out.println("getlists");
