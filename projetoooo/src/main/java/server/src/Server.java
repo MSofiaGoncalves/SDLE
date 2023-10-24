@@ -2,6 +2,7 @@ package server.src;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
+import java.util.logging.Logger;
 
 public class Server
 {
@@ -13,6 +14,7 @@ public class Server
             socket.bind("tcp://*:5555");
 
             while (!Thread.currentThread().isInterrupted()) {
+                System.out.println("Inside the while loop");
                 // Block until a message is received
                 byte[] reply = socket.recv(0);
 
@@ -24,8 +26,10 @@ public class Server
                 // Send a response
                 String response = "Hello, world!";
                 socket.send(response.getBytes(ZMQ.CHARSET), 0);
+
             }
+            System.out.println("While loop exited");
         }
-        System.out.println("Server started");
+        System.out.println("Server ended");
     }
 }

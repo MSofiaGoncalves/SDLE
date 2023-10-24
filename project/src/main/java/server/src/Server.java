@@ -30,6 +30,6 @@ public class Server
             }
             System.out.println("While loop exited");
         }
-     System.out.println("Server ended");
+        System.out.println("Server ended");
     }
 }
