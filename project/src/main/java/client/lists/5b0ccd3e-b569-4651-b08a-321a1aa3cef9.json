@@ -1,0 +1,10 @@
+{
+  "id": "5b0ccd3e-b569-4651-b08a-321a1aa3cef9",
+  "name": "a",
+  "products": {
+    "banana": {
+      "quantity": 3,
+      "quantityBought": 0
+    }
+  }
+}

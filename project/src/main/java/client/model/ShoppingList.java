@@ -1,16 +1,20 @@
 package client.model;
 
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import client.utils.ProductQuantity;
+import client.utils.TablePrinter;
 import com.google.gson.*;
+import zmq.socket.Pair;
 
 public class ShoppingList {
     private String id;
     private String name;
-    private Map<String, Integer> products;
+    private Map<String, ProductQuantity> products;
 
     public ShoppingList(String id, String name) {
         this.id = id;
@@ -18,7 +22,7 @@ public class ShoppingList {
         this.products = new HashMap<>();
     }
 
-    public ShoppingList(String id, String name, Map<String, Integer> products) {
+    public ShoppingList(String id, String name, Map<String, ProductQuantity> products) {
         this.id = id;
         this.name = name;
         this.products = products;
@@ -32,16 +36,16 @@ public class ShoppingList {
         return this.name;
     }
 
-    public Map<String, Integer> getProducts() {
+    public Map<String, ProductQuantity> getProducts() {
         return products;
     }
 
     public void addProduct(String name, int quantity) {
         if (products.containsKey(name)) {
-            System.out.println("exists");
-            addQuantity(name, quantity);
+            addProductQuantity(name, quantity);
         } else {
-            products.put(name, quantity);
+            ProductQuantity quantities = new ProductQuantity(quantity, 0);
+            products.put(name, quantities);
         }
     }
 
@@ -49,105 +53,41 @@ public class ShoppingList {
         products.remove(name);
     }
 
-    public void addQuantity(String name, int quantity) {
-        Integer currQuantity = products.get(name);
-        System.out.println("Cur quantity: " + currQuantity);
-        System.out.println("New quantity: " + (currQuantity + quantity));
-        products.put(name, currQuantity + quantity);
+    public void addProductQuantity(String name, int quantity) {
+        ProductQuantity currQuantities = products.get(name);
+        currQuantities.addToList(quantity);
     }
 
-    public void removeQuantity(String name, int quantity) {
-        Integer currQuantity = products.get(name);
-        if (currQuantity - quantity > 1) {
-            products.put(name, currQuantity - quantity);
-        } else {
-            products.remove(name);
-        }
+    public void buyProductQuantity(String name, int quantity) {
+        ProductQuantity currQuantities = products.get(name);
+        currQuantities.buyQuantity(quantity);
     }
 
     public void printProducts() {
-        System.out.println("\t* Product: Quantity ");
-        for (Map.Entry<String, Integer> entry : products.entrySet()) {
-            System.out.println("\t" + entry.getKey() + ": " + entry.getValue());
+        List<List<String>> data = new ArrayList<>();
+        data.add(List.of("Product Name", "Quantity", "Quantity Bought"));
+
+        for (Map.Entry<String, ProductQuantity> product : products.entrySet()) {
+            String productName = product.getKey();
+            ProductQuantity quantities = product.getValue();
+            data.add(List.of(productName, Integer.toString(quantities.getQuantity()), Integer.toString(quantities.getQuantityBought())));
         }
-        System.out.println("\n");
+
+        TablePrinter.printTable(data);
     }
 
     public Boolean hasProducts() {
         return this.products.size() != 0;
     }
 
-//    public JSONObject toJSonObject() {
-//        JSONObject shoppingListJson = new JSONObject();
-//        shoppingListJson.put("name", name);
-//        shoppingListJson.put("id", id);
-//
-//        JSONArray productsArray = new JSONArray();
-//        for (Map.Entry<String, Integer> entry : products.entrySet()) {
-//            JSONObject productJson = new JSONObject();
-//            productJson.put("name", entry.getKey());
-//            productJson.put("quantity", entry.getValue());
-//            productsArray.add(productJson);
-//        }
-//
-//        shoppingListJson.put("products", productsArray);
-//        return shoppingListJson;
-//    }
-//
-//    public void saveToFile() {
-//        String fileName = "client/lists/" + id + ".json";
-//        JSONObject jsonObject = toJSonObject();
-//
-//        try (FileWriter file = new FileWriter(fileName)) {
-//            file.write(jsonObject.toJSONString());
-//            System.out.println("Shopping list has been written to " + fileName);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    // TODO: Function that reads from json file
-//    public static ShoppingList loadFromFile(String fileName){
-//        System.out.println(fileName);
-//        JSONParser parser = new JSONParser();
-//        //String fileDirectory = "client/lists/" + fileName;
-//
-//        try (FileReader reader = new FileReader(fileName)) {
-//            JSONObject jsonShoppingList = (JSONObject) parser.parse(reader);
-//
-//            String listID = (String) jsonShoppingList.get("id");
-//            String name = (String) jsonShoppingList.get("name");
-//
-//            Map<String, Integer> fileProducts = new HashMap<>();
-//            JSONArray productsArray = (JSONArray) jsonShoppingList.get("products");
-//            for (Object product : productsArray) {
-//                JSONObject productJson = (JSONObject) product;
-//                String productName = (String) productJson.get("name");
-//                System.out.println(productName);
-//                long productQuantity = (long) productJson.get("quantity");
-//                //productJson.
-//                fileProducts.put(productName, (int) productQuantity);
-//            }
-//
-//            return new ShoppingList(name, listID, fileProducts);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ParseException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return null;
-//-------------
-//        try (Reader reader = new FileReader(fileName)) {
-//            // Create a Gson object
-//            Gson gson = new Gson();
-//
-//            // Parse the JSON file into a ShoppingList object
-//            ShoppingList shoppingList = gson.fromJson(reader, ShoppingList.class);
-//
-//            return shoppingList;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    public void saveToFile() {
+        Gson gson = new Gson();
+        String json = gson.toJson(this);
+        String fileName = this.id + ".json";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write(json);
+        } catch (IOException e) {
+            System.out.println("Error saving to file.");
+        }
+    }
 }
