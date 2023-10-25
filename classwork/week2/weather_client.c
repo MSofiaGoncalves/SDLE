@@ -6,13 +6,14 @@
 
 int main(int argc, char *argv[])
 {
+    try
     //  Socket to talk to server
     printf("Collecting updates from weather server...\n");
     void *context = zmq_ctx_new();
+    printf("a funcionar");
 
-    int rc;
     void *subscriberUS = zmq_socket(context, ZMQ_SUB);
-    rc = zmq_connect(subscriberUS, "tcp://localhost:5556");
+    int rc = zmq_connect(subscriberUS, "tcp://127.0.0.1:5556");
     assert(rc == 0);
     //  Subscribe to zipcode, default is NYC, 10001
     const char *filter = (argc > 1) ? argv[1] : "10001 ";
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
     assert(rc == 0);
 
     void *subscriberPT = zmq_socket(context, ZMQ_SUB);
-    rc = zmq_connect(subscriberPT, "tcp://localhost:5557");
+    rc = zmq_connect(subscriberPT, "tcp://127.0.0.1:5557");
     assert(rc == 0);
     //  Subscribe to zipcode, default is NYC, 10001
     const char *filterPT = (argc > 1) ? argv[1] : "4555 ";
