@@ -10,7 +10,10 @@ import java.util.Scanner;
 
 public class ListState implements State {
     private ShoppingList shoppingList;
-    ListState() {}
+
+    ListState() {
+    }
+
     ListState(ShoppingList shoppingList) {
         this.shoppingList = shoppingList;
     }
@@ -32,10 +35,11 @@ public class ListState implements State {
 
         System.out.println("This is the view list page. \n\n");
 
-        if(this.shoppingList.hasProducts()){
+        if (this.shoppingList.hasProducts()) {
             this.shoppingList.printProducts();
         }
 
-        return displayOptions(List.of("Add item", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new HubState(), null)));
+        return displayOptions(List.of("Add item", "Add quantity", "Buy quantity", "Go back", "Exit"),
+                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
     }
 }

@@ -22,11 +22,11 @@ public class ShoppingList {
         this.products = new HashMap<>();
     }
 
-    public ShoppingList(String id, String name, Map<String, ProductQuantity> products) {
-        this.id = id;
-        this.name = name;
-        this.products = products;
-    }
+//    public ShoppingList(String id, String name, Map<String, ProductQuantity> products) {
+//        this.id = id;
+//        this.name = name;
+//        this.products = products;
+//    }
 
     public String getId() {
         return this.id;
@@ -48,19 +48,28 @@ public class ShoppingList {
             products.put(name, quantities);
         }
     }
-
-    public void removeProduct(String name, int quantity) {
-        products.remove(name);
+    public void addProductQuantity(String name, int quantity) {
+        if(productExists(name)) {
+            ProductQuantity currQuantities = products.get(name);
+            currQuantities.addToList(quantity);
+        }
+        else{
+            System.out.println("Invalid product.");
+        }
     }
 
-    public void addProductQuantity(String name, int quantity) {
-        ProductQuantity currQuantities = products.get(name);
-        currQuantities.addToList(quantity);
+    public boolean productExists(String name){
+        return products.containsKey(name);
     }
 
     public void buyProductQuantity(String name, int quantity) {
-        ProductQuantity currQuantities = products.get(name);
-        currQuantities.buyQuantity(quantity);
+        if(productExists(name)) {
+            ProductQuantity currQuantities = products.get(name);
+            currQuantities.buyQuantity(quantity);
+        }
+        else{
+            System.out.println("Invalid product.");
+        }
     }
 
     public void printProducts() {
