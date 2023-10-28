@@ -83,11 +83,21 @@ public class ShoppingList {
     public void saveToFile() {
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        String fileName = this.id + ".json";
+        String fileName = "src/main/java/client/lists/" + this.id + ".json";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(json);
         } catch (IOException e) {
             System.out.println("Error saving to file.");
+        }
+    }
+
+    public static ShoppingList loadFromFile(String fileName) {
+        try(Reader reader = new FileReader(fileName)){
+            Gson gson = new Gson();
+            return gson.fromJson(reader, ShoppingList.class);
+        } catch (IOException e) {
+            System.out.println("Error loading from file.");
+            return null;
         }
     }
 }
