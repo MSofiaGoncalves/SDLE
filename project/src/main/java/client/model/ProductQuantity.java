@@ -38,4 +38,9 @@ public class ProductQuantity {
             this.quantity = 0;
         }
     }
+
+    @Override
+    public String toString() {
+        return "(" + quantity + ", " + quantityBought + ')';
+    }
 }

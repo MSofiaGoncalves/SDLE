@@ -14,6 +14,12 @@ public class ShoppingList {
     private String name;
     private Map<String, ProductQuantity> products;
 
+    public ShoppingList(String name) {
+        this.id = java.util.UUID.randomUUID().toString();
+        this.name = name;
+        this.products = new HashMap<>();
+    }
+
     public ShoppingList(String id, String name) {
         this.id = id;
         this.name = name;

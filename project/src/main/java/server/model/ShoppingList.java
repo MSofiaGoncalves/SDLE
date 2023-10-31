@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class ShoppingList {
     // making id indexed and unique
-    @BsonId
     @BsonProperty("id")
     private String id;
     @BsonProperty("name")

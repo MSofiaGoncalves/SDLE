@@ -6,32 +6,22 @@ import server.db.Database;
 import server.model.ShoppingList;
 import server.utils.Pair;
 
-public class Server
-{
-    public static void main(String[] args) throws Exception
-    {
-        try (ZContext context = new ZContext()) {
-            // Socket to talk to clients
-            ZMQ.Socket socket = context.createSocket(ZMQ.REP);
-            socket.bind("tcp://*:5555");
+public class Server {
+    public static void main(String[] args) throws Exception {
+        ZMQ.Socket socket = Store.getSocket();
+        System.out.println("Sever listening on port 5555.");
+        while (!Thread.currentThread().isInterrupted()) {
+            // Block until a message is received
+            byte[] clientIdentity = socket.recv();
 
-            while (!Thread.currentThread().isInterrupted()) {
-                System.out.println("Inside the while loop");
-                // Block until a message is received
-                byte[] reply = socket.recv(0);
+            // Receive empty delimiter frame
+            socket.recv();
 
-                // Print the message
-                System.out.println(
-                        "Received: [" + new String(reply, ZMQ.CHARSET) + "]"
-                );
+            String request = socket.recvStr();
 
-                // Send a response
-                String response = "Hello, world!";
-                socket.send(response.getBytes(ZMQ.CHARSET), 0);
-
-            }
-            System.out.println("While loop exited");
-        }
-        System.out.println("Server ended");
+            MessageHandler messageHandler = new MessageHandler(clientIdentity, request);
+            Store.execute(messageHandler);
     }
+        System.out.println("Server ended");
+}
 }

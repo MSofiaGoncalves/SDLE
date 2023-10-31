@@ -52,6 +52,9 @@ public class Database {
             mongoClient = MongoClients.create(uri);
             database = mongoClient.getDatabase("test");
 
+            Document indexKeys = new Document("id", 1);
+            IndexOptions indexOptions = new IndexOptions().unique(true);
+            getCollection().createIndex(indexKeys, indexOptions);
         } catch (Exception e) {
             System.out.println("Error connecting to database");
             System.out.println(e.getMessage());
@@ -70,6 +73,7 @@ public class Database {
             collection.insertOne(list);
         } catch (com.mongodb.MongoWriteException e) {
             // duplicate list
+            System.out.println("List already exists" + e.getMessage());
             if (e.getCode() == 11000) {
                 return false;
             }
@@ -114,8 +118,6 @@ public class Database {
      */
     private MongoCollection<ShoppingList> getCollection() {
         MongoCollection<ShoppingList> collection = database.getCollection("lists", ShoppingList.class).withCodecRegistry(codecRegistry);
-        IndexOptions indexOptions = new IndexOptions().unique(true);
-        collection.createIndex(new Document("fieldName", 1), indexOptions);
         return collection;
     }
 }

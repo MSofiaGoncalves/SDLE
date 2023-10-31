@@ -1,6 +1,8 @@
 package client;
 
 import client.model.ShoppingList;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,16 +13,24 @@ import java.util.UUID;
 public class Session {
     private HashMap<String, ShoppingList> lists;
     private static Session instance;
+    private static ServerConnector connector;
 
     private Session() {
-        System.out.println("constructor");
-//        lists = new HashMap<>();
         lists = loadListsFromFiles();
+        connector = new ServerConnector();
+    }
+
+    public static ServerConnector getConnector() {
+        if (connector == null) {
+            connector = new ServerConnector();
+        }
+        return connector;
     }
 
     /**
      * Creates a list.
      * Saves it to local storage and sends it to the server.
+     *
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
@@ -35,7 +45,7 @@ public class Session {
         return this.lists.get(id);
     }
 
-    public HashMap<String, ShoppingList> loadListsFromFiles(){
+    public HashMap<String, ShoppingList> loadListsFromFiles() {
         System.out.println("load from files");
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
         File folder = new File("src/main/java/client/lists");
@@ -49,8 +59,7 @@ public class Session {
                         shoppingLists.put(list.getId(), list);
                     }
                 }
-            }
-            else{
+            } else {
                 System.out.println("no files!");
             }
         }
