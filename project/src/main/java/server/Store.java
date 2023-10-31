@@ -5,6 +5,9 @@ import org.zeromq.ZMQ;
 
 import java.util.concurrent.Executors;
 
+/**
+ * Singleton class that holds the current session.
+ */
 public class Store {
     private static Store instance = null;
     private static ZContext context;

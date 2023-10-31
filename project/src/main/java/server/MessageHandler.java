@@ -10,11 +10,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Handles messages from the client. <br>
+ *
+ * Runs as a thread and should be called when a message is received.
+ */
 public class MessageHandler implements Runnable {
     private byte[] identity;
     private String messageRaw;
     private Message message;
 
+    /**
+     * Creates a new MessageHandler.
+     * @param identity The identity of the client.
+     * @param message The message to handle.
+     */
     public MessageHandler(byte[] identity, String message) {
         this.identity = identity;
         this.messageRaw = message;
@@ -31,7 +41,11 @@ public class MessageHandler implements Runnable {
         functionMap.get(message.getMethod()).apply(null);
     }
 
+    /**
+     * Inserts a list into the database.
+     */
     private Void insertList(Void unused) {
+        // TODO: Replace with logger
         System.out.println("Inserting list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
 
@@ -39,6 +53,9 @@ public class MessageHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Gets a list from the database.
+     */
     private Void getList(Void unused) {
         ShoppingList list = Database.getInstance().getList(message.getId());
         reply(new Gson().toJson(list));

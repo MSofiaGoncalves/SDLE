@@ -95,6 +95,10 @@ public class Database {
         return documents.first();
     }
 
+    /**
+     * Update a list in the database.
+     * @param list The list to update.
+     */
     public void updateList(ShoppingList list) {
         MongoCollection<ShoppingList> collection = getCollection();
         Bson filter = Filters.eq("id", list.getId());
