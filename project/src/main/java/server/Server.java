@@ -1,8 +1,7 @@
-package server.src;
+package server;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
-import java.util.logging.Logger;
 
 public class Server
 {
