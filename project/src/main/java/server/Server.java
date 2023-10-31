@@ -1,8 +1,10 @@
-package server.src;
+package server;
 
-import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
-import java.util.logging.Logger;
+import org.zeromq.ZMQ;
+import server.db.Database;
+import server.model.ShoppingList;
+import server.utils.Pair;
 
 public class Server
 {

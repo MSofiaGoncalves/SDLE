@@ -1,4 +1,4 @@
-package client.utils;
+package client.model;
 
 public class ProductQuantity {
     private int quantity;

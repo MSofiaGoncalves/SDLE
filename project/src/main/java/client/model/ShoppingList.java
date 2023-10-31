@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import client.utils.ProductQuantity;
 import client.utils.TablePrinter;
 import com.google.gson.*;
-import zmq.socket.Pair;
 
 public class ShoppingList {
     private String id;
