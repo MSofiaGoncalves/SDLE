@@ -1,0 +1,1 @@
+To run the server, make sure MongoDB is [installed](https://www.mongodb.com/docs/manual/administration/install-community/#std-label-install-mdb-community-edition) and running.
