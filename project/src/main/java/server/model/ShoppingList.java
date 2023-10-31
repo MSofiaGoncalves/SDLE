@@ -43,6 +43,10 @@ public class ShoppingList {
         this.name = name;
     }
 
+    public void setProducts(Map<String, Pair<Integer, Integer>> products) {
+        this.products = products;
+    }
+
     public Map<String, Pair<Integer, Integer>> getProducts() {
         return products;
     }

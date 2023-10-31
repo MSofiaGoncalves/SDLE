@@ -13,12 +13,21 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import server.model.ShoppingList;
 
+/**
+ * Database class
+ *
+ * This class is responsible for connecting to the database and performing
+ * operations on it.
+ */
 public class Database {
     private static Database instance;
     private static MongoClient mongoClient;
     private static MongoDatabase database;
     private static CodecRegistry codecRegistry;
 
+    /**
+     * Get the instance of the database.
+     */
     public static synchronized Database getInstance() {
         if (instance == null) {
             instance = new Database();
@@ -26,6 +35,9 @@ public class Database {
         return instance;
     }
 
+    /**
+     * Private constructor. Starts the MongoDB connection.
+     */
     private Database() {
         String uri = "mongodb://localhost:27017";
 
@@ -46,6 +58,11 @@ public class Database {
         }
     }
 
+    /**
+     * Insert a list into the database.
+     * @param list The list to insert.
+     * @return True if the list was inserted, false if it already exists.
+     */
     public boolean insertList(ShoppingList list) {
         MongoCollection<ShoppingList> collection = getCollection();
 
@@ -60,6 +77,11 @@ public class Database {
         return true;
     }
 
+    /**
+     * Get a list from the database.
+     * @param id The id of the list to get.
+     * @return The list if it exists, null otherwise.
+     */
     public ShoppingList getList(String id) {
         MongoCollection<ShoppingList> collection = getCollection();
 
@@ -69,6 +91,16 @@ public class Database {
         return documents.first();
     }
 
+    public void updateList(ShoppingList list) {
+        MongoCollection<ShoppingList> collection = getCollection();
+        Bson filter = Filters.eq("id", list.getId());
+        collection.replaceOne(filter, list);
+    }
+
+    /**
+     * Remove a list from the database.
+     * @param id The id of the list to remove.
+     */
     public void removeList(String id) {
         MongoCollection<ShoppingList> collection = getCollection();
 
@@ -76,6 +108,10 @@ public class Database {
         collection.deleteOne(filter);
     }
 
+    /**
+     * Get the collection of lists initiated with the correct codec.
+     * @return The collection of lists.
+     */
     private MongoCollection<ShoppingList> getCollection() {
         MongoCollection<ShoppingList> collection = database.getCollection("lists", ShoppingList.class).withCodecRegistry(codecRegistry);
         IndexOptions indexOptions = new IndexOptions().unique(true);

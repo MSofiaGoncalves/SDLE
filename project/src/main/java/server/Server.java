@@ -1,21 +1,15 @@
 package server;
 
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 import server.db.Database;
 import server.model.ShoppingList;
+import server.utils.Pair;
 
 public class Server
 {
     public static void main(String[] args) throws Exception
     {
-        Database db = Database.getInstance();
-        System.out.println(db.insertList(new ShoppingList("123", "HELLO")));
-        System.out.println(db.insertList(new ShoppingList("123", "test")));
-        ShoppingList l = db.getList("123");
-        System.out.println(l.getName());
-        db.removeList("123");
-
-        return;
-        /*
         try (ZContext context = new ZContext()) {
             // Socket to talk to clients
             ZMQ.Socket socket = context.createSocket(ZMQ.REP);
@@ -39,6 +33,5 @@ public class Server
             System.out.println("While loop exited");
         }
         System.out.println("Server ended");
-        */
     }
 }
