@@ -1,14 +1,12 @@
 package client;
 
 import client.model.ShoppingList;
+import java.util.Scanner;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Singleton class that holds the current session.
@@ -18,7 +16,10 @@ public class Session {
     private static Session instance;
     private static ServerConnector connector;
 
-    private Session() {
+    public static String username;
+
+    public Session(String username) {
+
         lists = loadListsFromFiles();
         connector = new ServerConnector();
     }
@@ -58,9 +59,11 @@ public class Session {
         return this.lists.get(id);
     }
 
+    //store individually considering the username
     public HashMap<String, ShoppingList> loadListsFromFiles() {
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
-        File folder = new File("src/main/java/client/lists");
+        File folder = new File("src/main/java/client/lists/" + username);
+        System.out.println(folder.getAbsolutePath());
         if (folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
             if (files != null) {
@@ -79,9 +82,21 @@ public class Session {
         return new ArrayList<>(this.lists.values());
     }
 
+    public static String getUsername() {
+        return username;
+    }
+
+    public static String setUsername(String name){
+        username = name;
+        return username;
+    }
+
     public static synchronized Session getSession() {
         if (instance == null) {
-            instance = new Session();
+
+            System.out.println("Username no getSession: " + username);
+
+            instance = new Session(username);
         }
         return instance;
     }

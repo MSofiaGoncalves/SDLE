@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import client.Session;
 import client.utils.TablePrinter;
 import com.google.gson.*;
 
@@ -93,10 +94,19 @@ public class ShoppingList {
         return this.products.size() != 0;
     }
 
+    //passar Session.getName
     public void saveToFile() {
+        String username = Session.getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        String fileName = "src/main/java/client/lists/" + this.id + ".json";
+        String directoryPath = "src/main/java/client/lists/" + username + "/";
+        String fileName = directoryPath + this.id + ".json";
+        // Check if the directory exists, and if not, create it
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs(); // Creates parent directories if they don't exist
+        }
+        //String fileName = "src/main/java/client/lists/" + username + "/"+ this.id + ".json";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(json);
         } catch (IOException e) {
@@ -113,4 +123,6 @@ public class ShoppingList {
             return null;
         }
     }
+
+
 }

@@ -7,6 +7,7 @@ import java.util.List;
 public class  HubState implements State {
     public State step() {
         breakLn();
+
         printTitle("Menu");
 
         return displayOptions(List.of("Create List", "Open List", "View Lists", "Exit"),
