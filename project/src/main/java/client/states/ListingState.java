@@ -20,13 +20,14 @@ public class ListingState implements State {
         }
         else {
             List<List<String>> table = new ArrayList<>();
-            table.add(List.of("Name", "ID"));
-            for (ShoppingList list : lists) {
-                table.add(List.of(list.getName(), list.getId()));
+            table.add(List.of("Index", "Name", "ID"));
+            for (int i = 0; i < lists.size(); i++) {
+                ShoppingList list = lists.get(i);
+                table.add(List.of(Integer.toString(i), list.getName(), list.getId()));
             }
             TablePrinter.printTable(table);
         }
 
-        return displayOptions(List.of("Go back", "Exit"), new ArrayList<>(Arrays.asList(new HubState(), null)));
+        return displayOptions(List.of("View List", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new ListIndexIDState(lists), new HubState(), null)));
     }
 }
