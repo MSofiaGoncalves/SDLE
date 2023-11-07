@@ -1,4 +1,4 @@
-*/client/lists/*
+src/main/java/client/lists
 
 .gradle
 build/
