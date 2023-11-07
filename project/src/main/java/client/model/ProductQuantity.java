@@ -1,4 +1,4 @@
-package client.utils;
+package client.model;
 
 public class ProductQuantity {
     private int quantity;
@@ -37,5 +37,10 @@ public class ProductQuantity {
             this.quantityBought = this.quantity;
             this.quantity = 0;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + quantity + ", " + quantityBought + ')';
     }
 }

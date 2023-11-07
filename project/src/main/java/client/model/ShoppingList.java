@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import client.utils.ProductQuantity;
 import client.utils.TablePrinter;
 import com.google.gson.*;
-import zmq.socket.Pair;
 
 public class ShoppingList {
     private String id;
     private String name;
     private Map<String, ProductQuantity> products;
+
+    public ShoppingList(String name) {
+        this.id = java.util.UUID.randomUUID().toString();
+        this.name = name;
+        this.products = new HashMap<>();
+    }
 
     public ShoppingList(String id, String name) {
         this.id = id;
