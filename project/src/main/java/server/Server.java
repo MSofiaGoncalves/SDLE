@@ -1,12 +1,19 @@
 package server;
 
 import org.zeromq.ZMQ;
+import server.Store;
+import java.util.logging.Logger;
+
 
 public class Server {
     public static void main(String[] args) throws Exception {
         ZMQ.Socket socket = Store.getSocket();
         // TODO: replace with logger
-        System.out.println("Sever listening on port 5555.");
+
+        Logger logger = Store.getLogger();
+
+        logger.info("Sever listening on port 5555.");
+        //System.out.println("Sever listening on port 5555.");
         while (!Thread.currentThread().isInterrupted()) {
             // Block until a message is received
             byte[] clientIdentity = socket.recv();
