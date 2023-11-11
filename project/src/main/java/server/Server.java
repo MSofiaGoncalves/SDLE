@@ -6,7 +6,11 @@ import java.util.logging.Logger;
 
 public class Server {
     public static void main(String[] args) throws Exception {
-        ZMQ.Socket socket = Store.getSocket();
+        parseArgs(args);
+
+        Store store = Store.getInstance();
+        store.initConnections();
+        ZMQ.Socket socket = store.getClientBroker();
         Logger logger = Store.getLogger();
         logger.info("Sever listening on port 5555.");
 
@@ -20,11 +24,18 @@ public class Server {
             String request = socket.recvStr();
 
             MessageHandler messageHandler = new MessageHandler(clientIdentity, request);
-            Store.execute(messageHandler);
+            store.execute(messageHandler);
         }
     }
 
-
-
-
+    private static void parseArgs(String[] args) {
+        Store store = Store.getInstance();
+        if (args.length == 0) {
+            throw new IllegalArgumentException("Usage: server <clienthost> <nodehost>");
+        }
+        store.setProperty("clienthost", args[0]);
+        if (args.length >= 2) {
+            store.setProperty("nodehost", args[1]);
+        }
+    }
 }

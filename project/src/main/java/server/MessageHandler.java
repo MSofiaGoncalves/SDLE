@@ -63,7 +63,7 @@ public class MessageHandler implements Runnable {
     }
 
     private void reply(String response) {
-        ZMQ.Socket socket =  Store.getSocket();
+        ZMQ.Socket socket =  Store.getInstance().getClientBroker();
 
         socket.send(identity, ZMQ.SNDMORE);
         socket.send("".getBytes(), ZMQ.SNDMORE);
