@@ -5,10 +5,10 @@ import org.zeromq.ZMQ;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
@@ -24,10 +24,12 @@ public class Store {
     private ZMQ.Socket clientBroker;
     private java.util.concurrent.ExecutorService threadPool;
     private Properties properties;
+    private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
     private static Logger logger;
 
     private Store() {
+        nodes = new ConcurrentHashMap<>();
         initProperties();
     }
 
@@ -39,13 +41,31 @@ public class Store {
 
         try {
             context = new ZContext();
+
+            // Create client broker
             clientBroker = context.createSocket(ZMQ.ROUTER);
             clientBroker.bind(getProperty("clienthost"));
+            logger.info("Listening for clients at " + getProperty("clienthost") + ".");
+            logger.info("Listening for nodes at " + getProperty("nodehost") + ".");
+
+            // Connect to all nodes
+            for (String nodeUrl: getProperty("nodes").split(";")) {
+                // Skip self
+                temp = nodeUrl.split(":");
+                if (temp[temp.length - 1].equals(getProperty("id"))) {
+                    continue;
+                }
+
+                ZMQ.Socket socket = getContext().createSocket(ZMQ.DEALER);
+                socket.connect(nodeUrl);
+                nodes.put(nodeUrl, socket);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         int numThreads = Runtime.getRuntime().availableProcessors(); // use one thread per CPU core
         threadPool = Executors.newFixedThreadPool(numThreads);
+
     }
 
     public static Store getInstance() {
@@ -67,6 +87,10 @@ public class Store {
         return clientBroker;
     }
 
+    public ConcurrentHashMap<String, ZMQ.Socket> getNodes() {
+        return nodes;
+    }
+
     public ZContext getContext() {
         if (context == null) {
             getInstance();
@@ -83,7 +107,6 @@ public class Store {
 
         try {
             Files.createDirectories(Paths.get("logs/"));
-            System.out.println(getProperty("clienthost"));
             FileHandler fileHandler = new FileHandler("logs/" + getProperty("id") + ".log", true);
             fileHandler.setFormatter(new LoggerFormatter());
             logger.addHandler(fileHandler);

@@ -10,21 +10,35 @@ public class Server {
 
         Store store = Store.getInstance();
         store.initConnections();
-        ZMQ.Socket socket = store.getClientBroker();
-        Logger logger = Store.getLogger();
-        logger.info("Sever listening on port 5555.");
+        ZMQ.Socket clientBroker = store.getClientBroker();
+
+        ZMQ.Poller poller = store.getContext().createPoller(1);
+        poller.register(clientBroker, ZMQ.Poller.POLLIN);
+        for (ZMQ.Socket node: store.getNodes().values()) {
+            poller.register(node, ZMQ.Poller.POLLIN);
+        }
 
         while (!Thread.currentThread().isInterrupted()) {
-            // Block until a message is received
-            byte[] clientIdentity = socket.recv();
+            poller.poll();
 
-            // Receive empty delimiter frame
-            socket.recv();
+            if (poller.pollin(0)) { // Client message
+                byte[] clientIdentity = clientBroker.recv();
 
-            String request = socket.recvStr();
+                // Receive empty delimiter frame
+                clientBroker.recv();
 
-            MessageHandler messageHandler = new MessageHandler(clientIdentity, request);
-            store.execute(messageHandler);
+                String request = clientBroker.recvStr();
+
+                MessageHandler messageHandler = new MessageHandler(clientIdentity, request);
+                store.execute(messageHandler);
+            } else { // Node message
+                for (int i = 1; i < poller.getSize(); i++) {
+                    if (poller.pollin(i)) {
+                        ZMQ.Socket node = poller.getSocket(i);
+                        byte[] identity = node.recv();
+                    }
+                }
+            }
         }
     }
 
