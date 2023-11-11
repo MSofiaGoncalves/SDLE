@@ -35,7 +35,8 @@ public class Server {
                 for (int i = 1; i < poller.getSize(); i++) {
                     if (poller.pollin(i)) {
                         ZMQ.Socket node = poller.getSocket(i);
-                        byte[] identity = node.recv();
+                        byte[] msg = node.recv();
+                        Store.getLogger().info("Received list: " + new String(msg, ZMQ.CHARSET));
                     }
                 }
             }

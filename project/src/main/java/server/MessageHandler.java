@@ -45,9 +45,13 @@ public class MessageHandler implements Runnable {
      * Inserts a list into the database.
      */
     private Void insertList(Void unused) {
-        // TODO: Replace with logger
-        System.out.println("Inserting list, " + message.getList().getId() + ", into database.");
+        Store.getLogger().info("Inserting list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
+
+        // TODO: replace with some kind of interface
+        Store store = Store.getInstance();
+        String request = String.format(message.getList().getId());
+        store.getNodes().get("tcp://localhost:6001").send(request.getBytes(ZMQ.CHARSET), 0);
 
         reply("");
         return null;

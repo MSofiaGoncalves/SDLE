@@ -35,7 +35,9 @@ public class Store {
 
     public void initConnections() {
         String[] temp = getProperty("clienthost").split(":");
-        setProperty("id", temp[temp.length - 1]);
+        setProperty("clientPort", temp[temp.length - 1]);
+        temp = getProperty("nodehost").split(":");
+        setProperty("nodePort", temp[temp.length - 1]);
 
         initLogger();
 
@@ -52,11 +54,12 @@ public class Store {
             for (String nodeUrl: getProperty("nodes").split(";")) {
                 // Skip self
                 temp = nodeUrl.split(":");
-                if (temp[temp.length - 1].equals(getProperty("id"))) {
+                if (temp[temp.length - 1].equals(getProperty("nodePort"))) {
                     continue;
                 }
 
                 ZMQ.Socket socket = getContext().createSocket(ZMQ.DEALER);
+                socket.bind(getProperty("nodehost"));
                 socket.connect(nodeUrl);
                 nodes.put(nodeUrl, socket);
             }
