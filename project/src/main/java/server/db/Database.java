@@ -11,6 +11,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
+import server.ConfigLoader;
 import server.model.ShoppingList;
 
 /**
@@ -39,8 +40,7 @@ public class Database {
      * Private constructor. Starts the MongoDB connection.
      */
     private Database() {
-        String uri = "mongodb://localhost:27017";
-
+        String uri = "mongodb://" + ConfigLoader.mongoHost + ":" + ConfigLoader.mongoPort;
         try {
             // Disable MongoDB logging
             ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);

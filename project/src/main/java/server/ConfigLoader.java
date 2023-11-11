@@ -7,6 +7,8 @@ import java.util.Properties;
 public class ConfigLoader {
 
     public static String serverHost;
+    public static Integer mongoPort;
+    public static String mongoHost;
 
     public static Properties loadProperties(String filePath) {
         Properties properties = new Properties();
@@ -31,6 +33,11 @@ public class ConfigLoader {
 
         System.out.println("Server Host no ConfigLoader: " + serverHost);
         //System.out.println("Server Port: " + serverPort);
+
+        //Load MongoDB porperties
+        Properties mongoProperties = loadProperties("mongo/mongoDB.properties");
+        mongoHost = mongoProperties.getProperty("mongohost");
+        mongoPort = Integer.parseInt(mongoProperties.getProperty("mongoport"));
 
         // Load client.properties
         /*Properties clientProperties = loadProperties("client/client.properties");
