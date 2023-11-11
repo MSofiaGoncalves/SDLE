@@ -5,10 +5,14 @@ import org.zeromq.ZMQ;
 import server.LoggerFormatter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+
 
 /**
  * Singleton class that holds the current session.
@@ -25,7 +29,7 @@ public class Store {
         try {
             context = new ZContext();
             socket = context.createSocket(ZMQ.ROUTER);
-            socket.bind("tcp://*:5555");
+            socket.bind("tcp://" + ConfigLoader.serverHost + ":5555");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -72,7 +76,7 @@ public class Store {
     }
 
     public static Logger getLogger() {
-        logger.info("Inside getLogger");
         return logger;
     }
+
 }
