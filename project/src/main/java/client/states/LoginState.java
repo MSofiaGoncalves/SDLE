@@ -16,19 +16,14 @@ public class LoginState implements State {
 
     private static Session instance;
     public State step() {
-
         breakLn();
-        printTitle("Username?");
+        printTitle("Login");
 
-        System.out.print("Name: ");
+        System.out.print("Username: ");
         Scanner in = new Scanner(System.in);
         String username = in.nextLine();
 
         Session.setUsername(username);
-
-        Session session = new Session(username);
-
-
         return new HubState();
     }
 }

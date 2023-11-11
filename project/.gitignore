@@ -1,4 +1,5 @@
 src/main/java/client/lists
+logs
 
 .gradle
 build/

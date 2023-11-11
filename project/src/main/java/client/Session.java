@@ -15,11 +15,9 @@ public class Session {
     private HashMap<String, ShoppingList> lists;
     private static Session instance;
     private static ServerConnector connector;
-
     public static String username;
 
-    public Session(String username) {
-
+    public Session() {
         lists = loadListsFromFiles();
         connector = new ServerConnector();
     }
@@ -59,11 +57,13 @@ public class Session {
         return this.lists.get(id);
     }
 
-    //store individually considering the username
+    /**
+     * Load all user's lists from local storage.
+     * @return A map of all lists.
+     */
     public HashMap<String, ShoppingList> loadListsFromFiles() {
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
         File folder = new File("src/main/java/client/lists/" + username);
-        System.out.println(folder.getAbsolutePath());
         if (folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
             if (files != null) {
@@ -82,21 +82,28 @@ public class Session {
         return new ArrayList<>(this.lists.values());
     }
 
+    /**
+     * Get the current user's username. <br>
+     * This is used only to save the lists to the correct folder.
+     * @return String with the username.
+     */
     public static String getUsername() {
         return username;
     }
 
-    public static String setUsername(String name){
+    public static void setUsername(String name){
+        if (instance == null) {
+            instance = new Session();
+        }
+        if (username != null) {
+            throw new RuntimeException("Username already set");
+        }
         username = name;
-        return username;
     }
 
     public static synchronized Session getSession() {
         if (instance == null) {
-
-            System.out.println("Username no getSession: " + username);
-
-            instance = new Session(username);
+            instance = new Session();
         }
         return instance;
     }

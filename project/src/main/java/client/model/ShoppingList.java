@@ -1,6 +1,8 @@
 package client.model;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,23 +93,18 @@ public class ShoppingList {
     }
 
     public Boolean hasProducts() {
-        return this.products.size() != 0;
+        return !this.products.isEmpty();
     }
 
-    //passar Session.getName
     public void saveToFile() {
         String username = Session.getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
         String directoryPath = "src/main/java/client/lists/" + username + "/";
         String fileName = directoryPath + this.id + ".json";
-        // Check if the directory exists, and if not, create it
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs(); // Creates parent directories if they don't exist
-        }
-        //String fileName = "src/main/java/client/lists/" + username + "/"+ this.id + ".json";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        try {
+            Files.createDirectories(Paths.get(directoryPath));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             writer.write(json);
         } catch (IOException e) {
             System.out.println("Error saving to file.");

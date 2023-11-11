@@ -5,6 +5,8 @@ import org.zeromq.ZMQ;
 import server.LoggerFormatter;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
@@ -17,15 +19,18 @@ public class Store {
     private static Store instance = null;
     private static ZContext context;
     private static ZMQ.Socket socket;
+    private static String port;
     private static java.util.concurrent.ExecutorService threadPool;
 
     private static Logger logger;
 
     private Store() {
+        // TODO: read port from config file
+        port = "5555";
         try {
             context = new ZContext();
             socket = context.createSocket(ZMQ.ROUTER);
-            socket.bind("tcp://*:5555");
+            socket.bind("tcp://*:" + port);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -33,7 +38,6 @@ public class Store {
         threadPool = Executors.newFixedThreadPool(numThreads);
 
         initLogger();
-        logger.info("initLogger done.");
     }
 
     public static Store getInstance() {
@@ -63,7 +67,8 @@ public class Store {
         logger.addHandler(consoleHandler);
 
         try {
-            FileHandler fileHandler = new FileHandler("logs.log", true);
+            Files.createDirectories(Paths.get("logs/"));
+            FileHandler fileHandler = new FileHandler("logs/" + port + ".log", true);
             fileHandler.setFormatter(new LoggerFormatter());
             logger.addHandler(fileHandler);
         } catch (IOException e) {
@@ -72,7 +77,9 @@ public class Store {
     }
 
     public static Logger getLogger() {
-        logger.info("Inside getLogger");
+        if (instance == null) {
+            getInstance();
+        }
         return logger;
     }
 }
