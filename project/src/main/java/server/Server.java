@@ -47,7 +47,9 @@ public class Server {
     private static void parseArgs(String[] args) {
         Store store = Store.getInstance();
         if (args.length == 0) {
-            throw new IllegalArgumentException("Usage: server <clienthost> <nodehost>");
+            System.out.println("Usage: server <clienthost> <nodehost>");
+            System.out.println("Warning: No hostname specified, using defaults.");
+            return;
         }
         store.setProperty("clienthost", args[0]);
         if (args.length >= 2) {
