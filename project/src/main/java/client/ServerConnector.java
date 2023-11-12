@@ -20,7 +20,7 @@ public class ServerConnector {
             context = new ZContext();
 
             socket = context.createSocket(ZMQ.REQ);
-            socket.connect("tcp://localhost:5555");
+            socket.connect("tcp://localhost:5000");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

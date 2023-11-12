@@ -5,10 +5,10 @@ import org.zeromq.ZMQ;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
@@ -20,29 +20,47 @@ import java.util.logging.FileHandler;
  */
 public class Store {
     private static Store instance = null;
-    private static ZContext context;
-    private static ZMQ.Socket socket;
-    private static String port;
-    private static java.util.concurrent.ExecutorService threadPool;
-    private static Properties properties;
+    private ZContext context;
+    private ZMQ.Socket clientBroker;
+    private java.util.concurrent.ExecutorService threadPool;
+    private Properties properties;
+    private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
     private static Logger logger;
 
     private Store() {
+        nodes = new ConcurrentHashMap<>();
         initProperties();
-        // TODO: read port from config file
-        port = "5555";
+    }
+
+    /**
+     * Creates a client router and connects to all nodes. <br>
+     * Should be called <strong>once</strong> when the server starts.
+     */
+    public void initConnections() {
+        if (context != null) {
+            return;
+        }
+
+        initHosts();
+        initLogger();
+
         try {
             context = new ZContext();
-            socket = context.createSocket(ZMQ.ROUTER);
-            socket.bind("tcp://" + getProperty("serverhost") + ":" + port);
+
+            // Create client broker
+            clientBroker = context.createSocket(ZMQ.ROUTER);
+            clientBroker.bind(getProperty("clienthost"));
+            logger.info("Listening for clients at " + getProperty("clienthost") + ".");
+            logger.info("Listening for nodes at " + getProperty("nodehost") + ".");
+
+            // Connect to all nodes
+            connectNodes();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.severe(e.getMessage());
         }
         int numThreads = Runtime.getRuntime().availableProcessors(); // use one thread per CPU core
         threadPool = Executors.newFixedThreadPool(numThreads);
-
-        initLogger();
     }
 
     public static Store getInstance() {
@@ -53,15 +71,26 @@ public class Store {
         return instance;
     }
 
-    public static void execute(Runnable runnable) {
+    public void execute(Runnable runnable) {
         threadPool.execute(runnable);
     }
 
-    public static ZMQ.Socket getSocket() {
-        if (socket == null) {
+    public ZMQ.Socket getClientBroker() {
+        if (clientBroker == null) {
             getInstance();
         }
-        return socket;
+        return clientBroker;
+    }
+
+    public ConcurrentHashMap<String, ZMQ.Socket> getNodes() {
+        return nodes;
+    }
+
+    public ZContext getContext() {
+        if (context == null) {
+            getInstance();
+        }
+        return context;
     }
 
     private void initLogger() {
@@ -73,7 +102,7 @@ public class Store {
 
         try {
             Files.createDirectories(Paths.get("logs/"));
-            FileHandler fileHandler = new FileHandler("logs/" + port + ".log", true);
+            FileHandler fileHandler = new FileHandler("logs/" + getProperty("id") + ".log", true);
             fileHandler.setFormatter(new LoggerFormatter());
             logger.addHandler(fileHandler);
         } catch (IOException e) {
@@ -81,21 +110,12 @@ public class Store {
         }
     }
 
-    private void initProperties() {
-        properties = new Properties();
-        final String filePath = "src/main/java/server/server.properties";
-        try {
-            properties.load(new FileInputStream(filePath));
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load properties file: " + filePath, e);
-        }
+    public String getProperty(String key) {
+        return properties.getProperty(key);
     }
 
-    public static String getProperty(String key) {
-        if (instance == null) {
-            getInstance();
-        }
-        return properties.getProperty(key);
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
     }
 
     public static Logger getLogger() {
@@ -105,4 +125,57 @@ public class Store {
         return logger;
     }
 
+    /**
+     * Loads the properties file.
+     */
+    private void initProperties() {
+        if (properties == null)
+            properties = new Properties();
+        final String filePath = "src/main/java/server/server.properties";
+        try {
+            properties.load(new FileInputStream(filePath));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load properties file: " + filePath, e);
+        }
+    }
+
+    /**
+     * Sets port numbers and defaults hostnames if not defined.
+     */
+    private void initHosts() {
+        if (getProperty("clienthost") == null) {
+            setProperty("clienthost", getProperty("clienthostdefault"));
+        }
+        if (getProperty("nodehost") == null) {
+            setProperty("nodehost", getProperty("nodehostdefault"));
+        }
+
+        String[] temp = getProperty("clienthost").split(":");
+        setProperty("clientPort", temp[temp.length - 1]);
+        // Id of a node is defined by the port it listens for clients
+        setProperty("id", temp[temp.length - 1]);
+
+        temp = getProperty("nodehost").split(":");
+        setProperty("nodePort", temp[temp.length - 1]);
+    }
+
+    /**
+     * Connects to all nodes specified in the properties file. <br>
+     *
+     * Inter-node communication is done using DEALER-DEALER sockets.
+     */
+    private void connectNodes() {
+        for (String nodeUrl: getProperty("nodes").split(";")) {
+            // Skip self
+            String[] temp = nodeUrl.split(":");
+            if (temp[temp.length - 1].equals(getProperty("nodePort"))) {
+                continue;
+            }
+
+            ZMQ.Socket socket = getContext().createSocket(ZMQ.DEALER);
+            socket.bind(getProperty("nodehost"));
+            socket.connect(nodeUrl);
+            nodes.put(nodeUrl, socket);
+        }
+    }
 }
