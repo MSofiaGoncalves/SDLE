@@ -11,11 +11,12 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
+import server.Store;
 import server.model.ShoppingList;
 
 /**
  * Database class
- *
+ * <p>
  * This class is responsible for connecting to the database and performing
  * operations on it.
  */
@@ -39,8 +40,7 @@ public class Database {
      * Private constructor. Starts the MongoDB connection.
      */
     private Database() {
-        String uri = "mongodb://localhost:27017";
-
+        String uri = Store.getInstance().getProperty("dbHost");
         try {
             // Disable MongoDB logging
             ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
@@ -50,7 +50,7 @@ public class Database {
                     MongoClientSettings.getDefaultCodecRegistry()
             );
             mongoClient = MongoClients.create(uri);
-            database = mongoClient.getDatabase("test");
+            database = mongoClient.getDatabase("db" + Store.getInstance().getProperty("id"));
 
             Document indexKeys = new Document("id", 1);
             IndexOptions indexOptions = new IndexOptions().unique(true);
@@ -63,6 +63,7 @@ public class Database {
 
     /**
      * Insert a list into the database.
+     *
      * @param list The list to insert.
      * @return True if the list was inserted, false if it already exists.
      */
@@ -83,6 +84,7 @@ public class Database {
 
     /**
      * Get a list from the database.
+     *
      * @param id The id of the list to get.
      * @return The list if it exists, null otherwise.
      */
@@ -97,6 +99,7 @@ public class Database {
 
     /**
      * Update a list in the database.
+     *
      * @param list The list to update.
      */
     public void updateList(ShoppingList list) {
@@ -107,6 +110,7 @@ public class Database {
 
     /**
      * Remove a list from the database.
+     *
      * @param id The id of the list to remove.
      */
     public void removeList(String id) {
@@ -118,6 +122,7 @@ public class Database {
 
     /**
      * Get the collection of lists initiated with the correct codec.
+     *
      * @return The collection of lists.
      */
     private MongoCollection<ShoppingList> getCollection() {

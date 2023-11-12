@@ -1,14 +1,12 @@
 package client;
 
 import client.model.ShoppingList;
+import java.util.Scanner;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Singleton class that holds the current session.
@@ -17,8 +15,9 @@ public class Session {
     private HashMap<String, ShoppingList> lists;
     private static Session instance;
     private static ServerConnector connector;
+    public static String username;
 
-    private Session() {
+    public Session() {
         lists = loadListsFromFiles();
         connector = new ServerConnector();
     }
@@ -59,9 +58,13 @@ public class Session {
         return this.lists.get(id);
     }
 
+    /**
+     * Load all user's lists from local storage.
+     * @return A map of all lists.
+     */
     public HashMap<String, ShoppingList> loadListsFromFiles() {
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
-        File folder = new File("src/main/java/client/lists");
+        File folder = new File("src/main/java/client/lists/" + username);
         if (folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
             if (files != null) {
@@ -78,6 +81,25 @@ public class Session {
 
     public List<ShoppingList> getLists() {
         return new ArrayList<>(this.lists.values());
+    }
+
+    /**
+     * Get the current user's username. <br>
+     * This is used only to save the lists to the correct folder.
+     * @return String with the username.
+     */
+    public static String getUsername() {
+        return username;
+    }
+
+    public static void setUsername(String name){
+        if (instance == null) {
+            instance = new Session();
+        }
+        if (username != null) {
+            throw new RuntimeException("Username already set");
+        }
+        username = name;
     }
 
     public static synchronized Session getSession() {

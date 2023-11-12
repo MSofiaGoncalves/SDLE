@@ -1,11 +1,14 @@
 package client.model;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import client.Session;
 import client.utils.TablePrinter;
 import com.google.gson.*;
 
@@ -90,14 +93,18 @@ public class ShoppingList {
     }
 
     public Boolean hasProducts() {
-        return this.products.size() != 0;
+        return !this.products.isEmpty();
     }
 
     public void saveToFile() {
+        String username = Session.getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        String fileName = "src/main/java/client/lists/" + this.id + ".json";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        String directoryPath = "src/main/java/client/lists/" + username + "/";
+        String fileName = directoryPath + this.id + ".json";
+        try {
+            Files.createDirectories(Paths.get(directoryPath));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             writer.write(json);
         } catch (IOException e) {
             System.out.println("Error saving to file.");
@@ -121,4 +128,6 @@ public class ShoppingList {
             return null;
         }
     }
+
+
 }
