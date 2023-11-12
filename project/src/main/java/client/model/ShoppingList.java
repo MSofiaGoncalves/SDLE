@@ -97,14 +97,18 @@ public class ShoppingList {
     }
 
     public void saveToFile() {
-        String username = Session.getUsername();
+        String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
+        System.out.println("Json: " + json);
         String directoryPath = "src/main/java/client/lists/" + username + "/";
         String fileName = directoryPath + this.id + ".json";
-        try {
-            Files.createDirectories(Paths.get(directoryPath));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        System.out.println("Username: " + username + "file: " + fileName);
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(json);
         } catch (IOException e) {
             System.out.println("Error saving to file.");

@@ -23,7 +23,10 @@ public class LoginState implements State {
         Scanner in = new Scanner(System.in);
         String username = in.nextLine();
 
-        Session.setUsername(username);
+        System.out.println("username read: " + username);
+
+        instance = Session.getSession();
+        instance.setUsername(username);
         return new HubState();
     }
 }

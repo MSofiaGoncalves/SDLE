@@ -18,7 +18,8 @@ public class Session {
     public static String username;
 
     public Session() {
-        lists = loadListsFromFiles();
+        System.out.println("AAA: " + username);
+        lists = new HashMap<>();
         connector = new ServerConnector();
     }
 
@@ -63,11 +64,15 @@ public class Session {
      * @return A map of all lists.
      */
     public HashMap<String, ShoppingList> loadListsFromFiles() {
+        System.out.println("Load username: " + username);
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
         File folder = new File("src/main/java/client/lists/" + username);
+        System.out.println("function: " + folder);
         if (folder.exists() && folder.isDirectory()) {
+            System.out.println("folder not null");
             File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
             if (files != null) {
+                System.out.println("files not null");
                 for (File file : files) {
                     ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
                     if (list != null) {
@@ -80,6 +85,7 @@ public class Session {
     }
 
     public List<ShoppingList> getLists() {
+        System.out.println("GET LIST: " + this.lists.size());
         return new ArrayList<>(this.lists.values());
     }
 
@@ -88,11 +94,12 @@ public class Session {
      * This is used only to save the lists to the correct folder.
      * @return String with the username.
      */
-    public static String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public static void setUsername(String name){
+    public void setUsername(String name){
+        System.out.println("Set username: " + name);
         if (instance == null) {
             instance = new Session();
         }
@@ -100,6 +107,7 @@ public class Session {
             throw new RuntimeException("Username already set");
         }
         username = name;
+        lists = loadListsFromFiles();
     }
 
     public static synchronized Session getSession() {

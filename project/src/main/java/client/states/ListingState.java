@@ -13,6 +13,7 @@ public class ListingState implements State {
         breakLn();
         printTitle("Your Lists");
 
+        System.out.println("USER: " + Session.getSession().getUsername());
         List<ShoppingList> lists = Session.getSession().getLists();
 
         if (lists.isEmpty()) {
