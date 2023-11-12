@@ -1,5 +1,6 @@
-package server;
+package server.connections;
 
+import server.Store;
 import server.db.Database;
 import server.model.ShoppingList;
 import com.google.gson.Gson;
@@ -15,17 +16,17 @@ import java.util.function.Function;
  *
  * Runs as a thread and should be called when a message is received.
  */
-public class MessageHandler implements Runnable {
+public class ClientHandler implements Runnable {
     private byte[] identity;
     private String messageRaw;
     private Message message;
 
     /**
-     * Creates a new MessageHandler.
+     * Creates a new ClientHandler.
      * @param identity The identity of the client.
      * @param message The message to handle.
      */
-    public MessageHandler(byte[] identity, String message) {
+    public ClientHandler(byte[] identity, String message) {
         this.identity = identity;
         this.messageRaw = message;
     }
@@ -45,13 +46,11 @@ public class MessageHandler implements Runnable {
      * Inserts a list into the database.
      */
     private Void insertList(Void unused) {
-        Store.getLogger().info("Inserting list, " + message.getList().getId() + ", into database.");
+        String listId = message.getList().getId();
+        Store.getLogger().info("Inserting list, " + listId + ", into database.");
         Database.getInstance().insertList(message.getList());
 
-        // TODO: replace with some kind of interface
-        Store store = Store.getInstance();
-        String request = String.format(message.getList().getId());
-        store.getNodes().get("tcp://localhost:6001").send(request.getBytes(ZMQ.CHARSET), 0);
+        new NodeConnector("tcp://localhost:6001").sendList(listId);
 
         reply("");
         return null;

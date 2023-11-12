@@ -36,6 +36,9 @@ public class Store {
     public void initConnections() {
         String[] temp = getProperty("clienthost").split(":");
         setProperty("clientPort", temp[temp.length - 1]);
+        // Id of a node is defined by the port it listens for clients
+        setProperty("id", temp[temp.length - 1]);
+
         temp = getProperty("nodehost").split(":");
         setProperty("nodePort", temp[temp.length - 1]);
 

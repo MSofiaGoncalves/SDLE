@@ -50,7 +50,7 @@ public class Database {
                     MongoClientSettings.getDefaultCodecRegistry()
             );
             mongoClient = MongoClients.create(uri);
-            database = mongoClient.getDatabase("test");
+            database = mongoClient.getDatabase("db" + Store.getInstance().getProperty("id"));
 
             Document indexKeys = new Document("id", 1);
             IndexOptions indexOptions = new IndexOptions().unique(true);

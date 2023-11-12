@@ -1,8 +1,8 @@
 package server;
 
 import org.zeromq.ZMQ;
-
-import java.util.logging.Logger;
+import server.connections.ClientHandler;
+import server.connections.NodeHandler;
 
 public class Server {
     public static void main(String[] args) throws Exception {
@@ -29,14 +29,15 @@ public class Server {
 
                 String request = clientBroker.recvStr();
 
-                MessageHandler messageHandler = new MessageHandler(clientIdentity, request);
-                store.execute(messageHandler);
+                ClientHandler clientHandler = new ClientHandler(clientIdentity, request);
+                store.execute(clientHandler);
             } else { // Node message
                 for (int i = 1; i < poller.getSize(); i++) {
                     if (poller.pollin(i)) {
                         ZMQ.Socket node = poller.getSocket(i);
                         byte[] msg = node.recv();
-                        Store.getLogger().info("Received list: " + new String(msg, ZMQ.CHARSET));
+                        NodeHandler nodeHandler = new NodeHandler(node, new String(msg, ZMQ.CHARSET));
+                        store.execute(nodeHandler);
                     }
                 }
             }
