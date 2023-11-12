@@ -104,8 +104,16 @@ public class ShoppingList {
         }
     }
 
+    public Boolean hasProduct(String name){
+        return this.products.containsKey(name);
+    }
+
+    public void deleteProduct(String name){
+        this.products.remove(name);
+    }
+
     public static ShoppingList loadFromFile(String fileName) {
-        try(Reader reader = new FileReader(fileName)){
+        try (Reader reader = new FileReader(fileName)) {
             Gson gson = new Gson();
             return gson.fromJson(reader, ShoppingList.class);
         } catch (IOException e) {

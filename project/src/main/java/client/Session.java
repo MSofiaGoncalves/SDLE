@@ -37,6 +37,7 @@ public class Session {
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
+        System.out.println("entered create list");
         ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = new ShoppingList(name);
         connector.insertList(shoppingList);
