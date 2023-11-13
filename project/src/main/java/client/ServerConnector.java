@@ -4,6 +4,11 @@ import client.model.ShoppingList;
 import com.google.gson.Gson;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
+import server.Store;
+
+import java.io.FileInputStream;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles the connection to the server.
@@ -11,6 +16,10 @@ import org.zeromq.ZMQ;
 public class ServerConnector {
     private ZContext context;
     private ZMQ.Socket socket;
+
+    private static ServerConnector instance = null;
+    private Properties properties;
+    private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
     /**
      * Creates a zmq socket and connects to the server.
@@ -20,7 +29,7 @@ public class ServerConnector {
             context = new ZContext();
 
             socket = context.createSocket(ZMQ.REQ);
-            socket.connect("tcp://localhost:5000");
+            socket.connect(getProperty("serverhost"));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -50,4 +59,10 @@ public class ServerConnector {
         byte[] reply = socket.recv(0);
         return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
     }
+
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+
 }
