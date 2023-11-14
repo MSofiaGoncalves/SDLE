@@ -4,7 +4,10 @@ import org.zeromq.ZMQ;
 import server.connections.ClientHandler;
 import server.connections.NodeHandler;
 
+import java.util.logging.Logger;
+
 public class Server {
+
     public static void main(String[] args) throws Exception {
         parseArgs(args);
 
@@ -46,9 +49,10 @@ public class Server {
 
     private static void parseArgs(String[] args) {
         Store store = Store.getInstance();
+        Store.initLogger();
         if (args.length == 0) {
-            System.out.println("Usage: server <clienthost> <nodehost>");
-            System.out.println("Warning: No hostname specified, using defaults.");
+            Store.logger.info("Usage: server <clienthost> <nodehost>");
+            Store.logger.info("Warning: No hostname specified, using defaults.");
             return;
         }
         store.setProperty("clienthost", args[0]);

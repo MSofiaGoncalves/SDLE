@@ -23,10 +23,10 @@ public class Store {
     private ZContext context;
     private ZMQ.Socket clientBroker;
     private java.util.concurrent.ExecutorService threadPool;
-    private Properties properties;
+    private static Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
-    private static Logger logger;
+    public static Logger logger;
 
     private Store() {
         nodes = new ConcurrentHashMap<>();
@@ -43,7 +43,7 @@ public class Store {
         }
 
         initHosts();
-        initLogger();
+        //initLogger(); Still not sure if this changes something that I'm not aware so I left the comment, used this function in Server instead
 
         try {
             context = new ZContext();
@@ -93,7 +93,7 @@ public class Store {
         return context;
     }
 
-    private void initLogger() {
+    public static void initLogger() {
         logger = Logger.getLogger("server");
         logger.setUseParentHandlers(false);
         ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -110,7 +110,7 @@ public class Store {
         }
     }
 
-    public String getProperty(String key) {
+    public static String getProperty(String key) {
         return properties.getProperty(key);
     }
 

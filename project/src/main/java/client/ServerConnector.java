@@ -4,6 +4,7 @@ import client.model.ShoppingList;
 import com.google.gson.Gson;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
+
 import server.Store;
 
 import java.io.FileInputStream;
@@ -21,13 +22,15 @@ public class ServerConnector {
     private Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
+
     /**
      * Creates a zmq socket and connects to the server.
      */
     public ServerConnector() {
         try {
             context = new ZContext();
-
+            initProperties();
+            initHosts();
             socket = context.createSocket(ZMQ.REQ);
             socket.connect(getProperty("serverhost"));
 
@@ -64,5 +67,30 @@ public class ServerConnector {
         return properties.getProperty(key);
     }
 
+    private void initProperties() {
+        if (properties == null)
+            properties = new Properties();
+        final String filePath = "src/main/java/client/client.properties";
+        try {
+            properties.load(new FileInputStream(filePath));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load properties file: " + filePath, e);
+        }
+    }
 
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
+
+    private void initHosts() {
+        if (getProperty("serverhost") == null) {
+            setProperty("serverhost", getProperty("serverhostdefault"));
+        }
+
+        String[] temp = getProperty("serverhost").split(":");
+        setProperty("serverPort", temp[temp.length - 1]);
+
+
+    }
 }
