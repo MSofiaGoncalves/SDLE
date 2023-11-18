@@ -12,6 +12,11 @@ import client.Session;
 import client.utils.TablePrinter;
 import com.google.gson.*;
 
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.*;
+import java.util.concurrent.Future;
+
 public class ShoppingList {
     private String id;
     private String name;
@@ -104,16 +109,28 @@ public class ShoppingList {
         String directoryPath = "src/main/java/client/lists/" + username + "/";
         String fileName = directoryPath + this.id + ".json";
         System.out.println("Username: " + username + "file: " + fileName);
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            writer.write(json);
-            // Explicitly flush the writer to ensure changes are written to the file immediately
-            writer.flush();
-        } catch (IOException e) {
-            System.out.println("Error saving to file.");
+
+        try {
+            Path path = Paths.get(fileName);
+            File directory = path.getParent().toFile();
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+
+            ByteBuffer buffer = ByteBuffer.wrap(json.getBytes());
+
+            // Asynchronously write to the file
+            Future<Integer> writeFuture = fileChannel.write(buffer, 0);
+
+            // Optionally, you can wait for the write operation to complete
+            writeFuture.get();
+
+            // Close the file channel
+            fileChannel.close();
+        } catch (Exception e) {
+            System.out.println("Error saving to file asynchronously: " + e.getMessage());
         }
     }
 
