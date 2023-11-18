@@ -110,10 +110,13 @@ public class ShoppingList {
         }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(json);
+            // Explicitly flush the writer to ensure changes are written to the file immediately
+            writer.flush();
         } catch (IOException e) {
             System.out.println("Error saving to file.");
         }
     }
+
 
     public Boolean hasProduct(String name){
         return this.products.containsKey(name);
