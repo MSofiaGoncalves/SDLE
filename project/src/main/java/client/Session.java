@@ -18,7 +18,6 @@ public class Session {
     public static String username;
 
     public Session() {
-        System.out.println("AAA: " + username);
         lists = new HashMap<>();
         connector = new ServerConnector();
     }

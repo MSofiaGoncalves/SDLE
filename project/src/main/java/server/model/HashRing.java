@@ -17,16 +17,19 @@ public class HashRing {
     private final TreeMap<Long, String> ring;
     private final int virtualNodesNumber;
     private final int size;
+    private final int replicas;
 
     /**
      * Creates a new HashRing.
      *
      * @param virtualNodesNumber The number of virtual nodes for each physical node.
      * @param size               The size of the ring.
+     * @param replicas           The number of replicas to store.
      */
-    public HashRing(int virtualNodesNumber, int size) {
+    public HashRing(int virtualNodesNumber, int size, int replicas) {
         this.virtualNodesNumber = virtualNodesNumber;
         this.size = size;
+        this.replicas = replicas;
         ring = new TreeMap<>();
     }
 
@@ -36,9 +39,10 @@ public class HashRing {
      * @param nodes              The nodes to add to the ring.
      * @param virtualNodesNumber The number of virtual nodes for each physical node.
      * @param size               The size of the ring.
+     * @param replicas           The number of replicas to store.
      */
-    public HashRing(String[] nodes, int virtualNodesNumber, int size) {
-        this(virtualNodesNumber, size);
+    public HashRing(String[] nodes, int virtualNodesNumber, int size, int replicas) {
+        this(virtualNodesNumber, size, replicas);
         addNodes(nodes);
     }
 
@@ -82,7 +86,7 @@ public class HashRing {
      * @param key The key to get the nodes for.
      * @return The nodes that hold the key.
      */
-    public String[] getNodes(String key, int replicasNumber) {
+    public String[] getNodes(String key) {
         Long hash = getHash(key);
         if (!ring.containsKey(hash)) {
             hash = ring.floorKey(hash);
@@ -93,13 +97,13 @@ public class HashRing {
         Set<String> nodes = new HashSet<>();
         nodes.add(ring.get(hash));
         Long initialHash = hash;
-        while (nodes.size() < replicasNumber) {
+        while (nodes.size() < replicas) {
             hash = ring.higherKey(hash);
             if (hash == null) {
                 hash = ring.firstKey();
             }
             if (hash.equals(initialHash)) {
-                throw new RuntimeException("Error: Trying to store " + replicasNumber
+                throw new RuntimeException("Error: Trying to store " + replicas
                         + " replicas of key " + key + " but only "
                         + nodes.size() + " nodes are available.");
             }

@@ -46,7 +46,6 @@ public class Store {
         }
 
         initHosts();
-        //initLogger(); Still not sure if this changes something that I'm not aware so I left the comment, used this function in Server instead
 
         try {
             context = new ZContext();
@@ -61,8 +60,9 @@ public class Store {
             connectNodes();
 
             hashRing = new HashRing(getProperty("nodes").split(";"),
-                    Integer.parseInt(getProperty("virtualReplicas")),
-                    Integer.parseInt(getProperty("ringSize")));
+                    Integer.parseInt(getProperty("virtualNodes")),
+                    Integer.parseInt(getProperty("ringSize")),
+                    Integer.parseInt(getProperty("replicas")));
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
@@ -76,6 +76,10 @@ public class Store {
         }
 
         return instance;
+    }
+
+    public HashRing getHashRing() {
+        return hashRing;
     }
 
     public void execute(Runnable runnable) {

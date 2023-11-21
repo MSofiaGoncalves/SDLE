@@ -18,10 +18,8 @@ public class ServerConnector {
     private ZContext context;
     private ZMQ.Socket socket;
 
-    private static ServerConnector instance = null;
     private Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
-
 
     /**
      * Creates a zmq socket and connects to the server.
@@ -32,8 +30,9 @@ public class ServerConnector {
             initProperties();
             initHosts();
             socket = context.createSocket(ZMQ.REQ);
-            socket.connect(getProperty("serverhost"));
-
+            for (String host : getProperty("nodes").split(";")) {
+                socket.connect(host);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -27,11 +27,8 @@ public class NodeConnector {
         }
     }
 
-    public void sendList(String listId) {
-        Database database = Database.getInstance();
-        ShoppingList list = database.getList(listId);
-
-        String request = String.format("{\"method\":\"insert\", \"list\":%s}", new Gson().toJson(list));
+    public void sendList(String listJSON) {
+        String request = String.format("{\"method\":\"insert\", \"list\":%s}", listJSON);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
     }
 }
