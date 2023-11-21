@@ -2,11 +2,13 @@ package server;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
+import server.model.HashRing;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -25,6 +27,7 @@ public class Store {
     private java.util.concurrent.ExecutorService threadPool;
     private static Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
+    private HashRing hashRing;
 
     public static Logger logger;
 
@@ -56,6 +59,10 @@ public class Store {
 
             // Connect to all nodes
             connectNodes();
+
+            hashRing = new HashRing(getProperty("nodes").split(";"),
+                    Integer.parseInt(getProperty("virtualReplicas")),
+                    Integer.parseInt(getProperty("ringSize")));
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
@@ -161,11 +168,11 @@ public class Store {
 
     /**
      * Connects to all nodes specified in the properties file. <br>
-     *
+     * <p>
      * Inter-node communication is done using DEALER-DEALER sockets.
      */
     private void connectNodes() {
-        for (String nodeUrl: getProperty("nodes").split(";")) {
+        for (String nodeUrl : getProperty("nodes").split(";")) {
             // Skip self
             String[] temp = nodeUrl.split(":");
             if (temp[temp.length - 1].equals(getProperty("nodePort"))) {
