@@ -16,6 +16,7 @@ public class CreateListState implements State {
 
         System.out.println("after name read");
         ShoppingList shoppingList = Session.getSession().createList(name);
+        shoppingList.saveToFile();
         System.out.println("after create list");
 
         return new ListState(shoppingList);
