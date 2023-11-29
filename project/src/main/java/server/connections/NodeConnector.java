@@ -27,8 +27,26 @@ public class NodeConnector {
         }
     }
 
-    public void sendList(String listJSON) {
-        String request = String.format("{\"method\":\"insert\", \"list\":%s}", listJSON);
+    public ZMQ.Socket sendListWrite(ShoppingList list) {
+        String listJSON = new Gson().toJson(list);
+        String request = String.format("{\"method\":\"write\", \"list\":%s}", listJSON);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        return socket;
+    }
+
+    // TODO
+    /*
+    public void sendListRead(String id) {
+        String request = String.format("{\"method\":\"write\", \"list\":%s}", listJSON);
+        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+    }
+
+     */
+
+    public ZMQ.Socket sendRedirectWrite(ShoppingList list) {
+        String listJSON = new Gson().toJson(list);
+        String request = String.format("{\"method\":\"redirectWrite\", \"list\":%s}", listJSON);
+        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        return socket;
     }
 }

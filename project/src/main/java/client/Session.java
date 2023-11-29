@@ -38,7 +38,7 @@ public class Session {
     public ShoppingList createList(String name) {
         ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = new ShoppingList(name);
-        connector.insertList(shoppingList);
+        connector.writeList(shoppingList);
         this.lists.put(shoppingList.getId(), shoppingList);
         return shoppingList;
     }

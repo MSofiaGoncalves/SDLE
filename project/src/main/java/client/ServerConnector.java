@@ -39,11 +39,11 @@ public class ServerConnector {
     }
 
     /**
-     * Sends a request to the server to insert a list.
-     * @param shoppingList The list to insert.
+     * Sends a request to the server to write a list.
+     * @param shoppingList The list to write.
      */
-    public void insertList(ShoppingList shoppingList) {
-        String request = String.format("{\"method\":\"insert\", \"list\":%s}", new Gson().toJson(shoppingList));
+    public void writeList(ShoppingList shoppingList) {
+        String request = String.format("{\"method\":\"write\", \"list\":%s}", new Gson().toJson(shoppingList));
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
         byte[] reply = socket.recv(0);

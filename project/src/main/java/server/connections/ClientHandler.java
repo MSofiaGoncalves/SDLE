@@ -37,7 +37,7 @@ public class ClientHandler implements Runnable {
         message = new Gson().fromJson(messageRaw, Message.class);
 
         Map<String, Function<Void, Void>> functionMap = new HashMap<>();
-        functionMap.put("insert", this::insertList);
+        functionMap.put("write", this::writeList);
         functionMap.put("get", this::getList);
 
         functionMap.get(message.getMethod()).apply(null);
@@ -46,22 +46,27 @@ public class ClientHandler implements Runnable {
     /**
      * Inserts a list into the database.
      */
-    private Void insertList(Void unused) {
-        Store.getLogger().info("List insertion request: " + message.getList().getId());
+    private Void writeList(Void unused) {
+        Store.getLogger().info("List writing request: " + message.getList().getId());
 
         HashRing ring = Store.getInstance().getHashRing();
         String[] nodes = ring.getNodes(message.getList().getId());
 
-        // TODO: Quorum Consensus
-        if (nodes[0].equals(Store.getProperty("nodehost"))) {
-            Store.getLogger().info("Inserting list: " + message.getList().getId() + " into database.");
-            Database.getInstance().insertList(message.getList());
-        } else {
+        if (nodes[0].equals(Store.getProperty("nodehost"))) { // Quorum Leader
+            QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumOperation.WRITE);
+            quorum.setClientIdentity(identity);
+            quorum.run();
+        } else { // Not Quorum Leader, redirect to leader
             Store.getLogger().info("Redirecting list to node: " + nodes[0]);
-            new NodeConnector(nodes[0]).sendList(new Gson().toJson(message.getList()));
+            new NodeConnector(nodes[0]).sendRedirectWrite(message.getList());
+            // TODO replies
+            ZMQ.Socket socket =  Store.getInstance().getClientBroker();
+
+            socket.send(identity, ZMQ.SNDMORE);
+            socket.send("".getBytes(), ZMQ.SNDMORE);
+            socket.send("".getBytes(), 0);
         }
 
-        reply("");
         return null;
     }
 
@@ -70,15 +75,8 @@ public class ClientHandler implements Runnable {
      */
     private Void getList(Void unused) {
         ShoppingList list = Database.getInstance().getList(message.getId());
-        reply(new Gson().toJson(list));
+        // TODO reading
+        //reply(new Gson().toJson(list));
         return null;
-    }
-
-    private void reply(String response) {
-        ZMQ.Socket socket =  Store.getInstance().getClientBroker();
-
-        socket.send(identity, ZMQ.SNDMORE);
-        socket.send("".getBytes(), ZMQ.SNDMORE);
-        socket.send(response, 0);
     }
 }

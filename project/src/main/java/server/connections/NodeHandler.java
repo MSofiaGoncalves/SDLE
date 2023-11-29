@@ -26,21 +26,34 @@ public class NodeHandler implements Runnable {
     public NodeHandler(ZMQ.Socket socket, String message) {
         this.messageRaw = message;
         this.message = new Gson().fromJson(messageRaw, Message.class);
+        this.socket = socket;
     }
 
     @Override
     public void run() {
-        Store.getLogger().info("Received list: " + message.getList().getId());
-
         Map<String, Function<Void, Void>> functionMap = new HashMap<>();
-        functionMap.put("insert", this::insertList);
+        functionMap.put("write", this::writeList);
+        functionMap.put("redirectWrite", this::redirectWrite);
+
+        if (message == null) {
+            return;
+        }
 
         functionMap.get(message.getMethod()).apply(null);
     }
 
-    private Void insertList(Void unused) {
-        Store.getLogger().info("Inserting list, " + message.getList().getId() + ", into database.");
+    private Void writeList(Void unused) {
+        Store.getLogger().info("Writing list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
+        socket.send("".getBytes(ZMQ.CHARSET), 0);
+        return null;
+    }
+
+    private Void redirectWrite(Void unused) {
+        Store.getLogger().info("Received list write redirect: " + message.getList().getId());
+        QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumOperation.WRITE);
+        quorum.run();
+        // TODO response
         return null;
     }
 }

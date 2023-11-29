@@ -62,7 +62,7 @@ public class Store {
             hashRing = new HashRing(getProperty("nodes").split(";"),
                     Integer.parseInt(getProperty("virtualNodes")),
                     Integer.parseInt(getProperty("ringSize")),
-                    Integer.parseInt(getProperty("replicas")));
+                    Integer.parseInt(getProperty("quorumNumber")));
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
