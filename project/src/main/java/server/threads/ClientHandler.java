@@ -1,15 +1,16 @@
-package server.connections;
+package server.threads;
 
 import server.Store;
+import server.connections.NodeConnector;
 import server.db.Database;
 import server.model.HashRing;
 import server.model.ShoppingList;
 import com.google.gson.Gson;
-import org.zeromq.ZMQ;
 import server.model.Message;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -50,21 +51,16 @@ public class ClientHandler implements Runnable {
         Store.getLogger().info("List writing request: " + message.getList().getId());
 
         HashRing ring = Store.getInstance().getHashRing();
-        String[] nodes = ring.getNodes(message.getList().getId());
+        Set<String> nodes = ring.getNodes(message.getList().getId());
 
-        if (nodes[0].equals(Store.getProperty("nodehost"))) { // Quorum Leader
-            QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumOperation.WRITE);
+        if (nodes.contains(Store.getProperty("nodehost"))) { // Part of Ring
+            QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
             quorum.setClientIdentity(identity);
             quorum.run();
-        } else { // Not Quorum Leader, redirect to leader
-            Store.getLogger().info("Redirecting list to node: " + nodes[0]);
-            new NodeConnector(nodes[0]).sendRedirectWrite(message.getList());
-            // TODO replies
-            ZMQ.Socket socket =  Store.getInstance().getClientBroker();
-
-            socket.send(identity, ZMQ.SNDMORE);
-            socket.send("".getBytes(), ZMQ.SNDMORE);
-            socket.send("".getBytes(), 0);
+        } else { // Not part of ring, redirect
+            String node = nodes.iterator().next();
+            Store.getLogger().info("Redirecting list to node: " + node);
+            new NodeConnector(node).sendRedirectWrite(message.getList(), identity);
         }
 
         return null;
@@ -74,7 +70,7 @@ public class ClientHandler implements Runnable {
      * Gets a list from the database.
      */
     private Void getList(Void unused) {
-        ShoppingList list = Database.getInstance().getList(message.getId());
+        ShoppingList list = Database.getInstance().getList(message.getListId());
         // TODO reading
         //reply(new Gson().toJson(list));
         return null;

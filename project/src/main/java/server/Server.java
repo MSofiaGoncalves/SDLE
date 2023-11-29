@@ -1,10 +1,8 @@
 package server;
 
 import org.zeromq.ZMQ;
-import server.connections.ClientHandler;
-import server.connections.NodeHandler;
-
-import java.util.logging.Logger;
+import server.threads.ClientHandler;
+import server.threads.NodeHandler;
 
 public class Server {
 

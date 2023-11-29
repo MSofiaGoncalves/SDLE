@@ -3,6 +3,7 @@ package server;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import server.model.HashRing;
+import server.model.QuorumStatus;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,11 +29,13 @@ public class Store {
     private static Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
     private HashRing hashRing;
+    private ConcurrentHashMap<String, QuorumStatus> quorums;
 
     public static Logger logger;
 
     private Store() {
         nodes = new ConcurrentHashMap<>();
+        quorums = new ConcurrentHashMap<>();
         initProperties();
     }
 
@@ -119,6 +122,10 @@ public class Store {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ConcurrentHashMap<String, QuorumStatus> getQuorums() {
+        return quorums;
     }
 
     public static String getProperty(String key) {

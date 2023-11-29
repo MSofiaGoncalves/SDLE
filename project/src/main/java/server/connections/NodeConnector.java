@@ -1,6 +1,7 @@
 package server.connections;
 
 import com.google.gson.Gson;
+import org.w3c.dom.Node;
 import org.zeromq.ZMQ;
 import server.Store;
 import server.db.Database;
@@ -27,9 +28,15 @@ public class NodeConnector {
         }
     }
 
-    public ZMQ.Socket sendListWrite(ShoppingList list) {
+    public NodeConnector(ZMQ.Socket socket) {
+        this.socket = socket;
+    }
+
+    public ZMQ.Socket sendListWrite(ShoppingList list, String quorumId) {
         String listJSON = new Gson().toJson(list);
-        String request = String.format("{\"method\":\"write\", \"list\":%s}", listJSON);
+        String request =
+                String.format("{\"method\":\"write\", \"quorumId\": %s, \"list\":%s}",
+                        quorumId, listJSON);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
         return socket;
     }
@@ -43,9 +50,19 @@ public class NodeConnector {
 
      */
 
-    public ZMQ.Socket sendRedirectWrite(ShoppingList list) {
+    public ZMQ.Socket sendRedirectWrite(ShoppingList list, byte[] identity) {
         String listJSON = new Gson().toJson(list);
-        String request = String.format("{\"method\":\"redirectWrite\", \"list\":%s}", listJSON);
+        String request = String.format(
+                "{\"method\":\"redirectWrite\", \"clientIdentity\":\"%s\", \"list\":%s}",
+                new String(identity, ZMQ.CHARSET), listJSON);
+        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        return socket;
+    }
+
+    public ZMQ.Socket sendRedirectWriteReply(byte[] identity) {
+        String request = String.format(
+                "{\"method\":\"redirectWriteReply\", \"clientIdentity\": \"%s\"}",
+                identity);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
         return socket;
     }
