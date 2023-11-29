@@ -2,6 +2,7 @@ package server.connections;
 
 import server.Store;
 import server.db.Database;
+import server.model.HashRing;
 import server.model.ShoppingList;
 import com.google.gson.Gson;
 import org.zeromq.ZMQ;
@@ -46,11 +47,19 @@ public class ClientHandler implements Runnable {
      * Inserts a list into the database.
      */
     private Void insertList(Void unused) {
-        String listId = message.getList().getId();
-        Store.getLogger().info("Inserting list, " + listId + ", into database.");
-        Database.getInstance().insertList(message.getList());
+        Store.getLogger().info("List insertion request: " + message.getList().getId());
 
-        new NodeConnector("tcp://localhost:6001").sendList(listId);
+        HashRing ring = Store.getInstance().getHashRing();
+        String[] nodes = ring.getNodes(message.getList().getId());
+
+        // TODO: Quorum Consensus
+        if (nodes[0].equals(Store.getProperty("nodehost"))) {
+            Store.getLogger().info("Inserting list: " + message.getList().getId() + " into database.");
+            Database.getInstance().insertList(message.getList());
+        } else {
+            Store.getLogger().info("Redirecting list to node: " + nodes[0]);
+            new NodeConnector(nodes[0]).sendList(new Gson().toJson(message.getList()));
+        }
 
         reply("");
         return null;
