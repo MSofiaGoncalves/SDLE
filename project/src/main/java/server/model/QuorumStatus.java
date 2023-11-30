@@ -4,23 +4,42 @@ import org.zeromq.ZMQ;
 import server.Store;
 import server.connections.NodeConnector;
 
+/**
+ * Keeps track of the status of a quorum.
+ */
 public class QuorumStatus {
-    private int quorumSize;
+    private final int quorumSize;
     private int currentSize;
-    private String id;
-    private ZMQ.Socket nodeSocket; // for redirect
-    private byte[] identity; // for client responses
-    private String redirectId;
+    private final String id;
+    private final ZMQ.Socket nodeSocket; // for redirect
+    private final byte[] identity; // for client responses
+    private final String redirectId;
 
+    /**
+     * Creates a new QuorumStatus. <br>
+     * Either {identity} or {nodeSocket, redirectId} must be set, for client and redirect replies, respectively.
+     * @param quorumSize Number of nodes needed for completion.
+     * @param nodeSocket The socket of the node to redirect to.
+     * @param identity The identity of the client to reply to.
+     * @param redirectId The id of the redirection, to be used in the reply.
+     */
     public QuorumStatus(int quorumSize, ZMQ.Socket nodeSocket, byte[] identity, String redirectId) {
         this.quorumSize = quorumSize;
         this.currentSize = 0;
         this.id = java.util.UUID.randomUUID().toString();
+        if ((nodeSocket == null && redirectId == null) && identity == null) {
+            throw new IllegalArgumentException("Either nodeSocket or identity must be set.");
+        }
         this.nodeSocket = nodeSocket;
         this.identity = identity;
         this.redirectId = redirectId;
     }
 
+    /**
+     * Increments the current size of the quorum and checks if it is complete. <br>
+     * When complete, sends the adequate reply (either client or other node).
+     * @return True if the quorum is complete, false otherwise.
+     */
     public synchronized boolean increment() {
         this.currentSize++;
         if (isQuorum()) {
@@ -38,6 +57,10 @@ public class QuorumStatus {
         return this.currentSize >= this.quorumSize;
     }
 
+    /**
+     * Finish up the quorum. Reply to the client or to other node if the request
+     * came from a redirect.
+     */
     private void finish() {
         if (this.nodeSocket != null) {
             new NodeConnector(this.nodeSocket).sendRedirectWriteReply(this.redirectId);

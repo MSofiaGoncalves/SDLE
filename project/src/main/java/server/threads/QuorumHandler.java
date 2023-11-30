@@ -15,6 +15,9 @@ enum QuorumMode {
     WRITE
 }
 
+/**
+ * Quorum Leader Handler
+ */
 public class QuorumHandler implements Runnable {
     private byte[] clientIdentity;
     private ZMQ.Socket nodeSocket;
@@ -31,6 +34,11 @@ public class QuorumHandler implements Runnable {
         this.operation = operation;
     }
 
+    /**
+     * Creates a new QuorumHandler. Used for WRITE mode.
+     * @param list The list to write.
+     * @param operation The operation to perform, must be WRITE.
+     */
     public QuorumHandler(ShoppingList list, QuorumMode operation) {
         if (operation == QuorumMode.READ) {
             throw new IllegalArgumentException("Cannot write a list with only the id.");
@@ -71,11 +79,16 @@ public class QuorumHandler implements Runnable {
 
     }
 
+    /**
+     * Quorum write leader: <br>
+     *    - Create quorum status <br>
+     *    - Write to local database <br>
+     *    - Inform w - 1 other nodes
+     */
     private void write() {
         // Create quorum status
         Store store = Store.getInstance();
         int writeN = Integer.parseInt(Store.getProperty("quorumWrites"));
-        System.out.println("identity" + clientIdentity);
         QuorumStatus quorumStatus =
                 new QuorumStatus(writeN, nodeSocket, clientIdentity, redirectId);
         quorumStatus.increment();

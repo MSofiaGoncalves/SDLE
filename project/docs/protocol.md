@@ -21,8 +21,9 @@ The server will never initiate a message to the client.
 
 ### Server-to-Server Messages
 
-| Method   | Parameters | Response                 | Description                                          |
-|----------|------------|--------------------------|------------------------------------------------------|
-| write    | list       | status {0 OK, 1 [Error]} | Write a list to the db                               |
-| read     | id         | list                     | Write a list to the db                               |
-| redirect | request    | response                 | Redirect a client request to proper node in the ring |
+| Method             | Parameters       | Response                   | Description                  |
+|--------------------|------------------|----------------------------|------------------------------|
+| write              | quorumId, list   | method{writeAck}           | Write a list to the db       |
+| writeAck           | quorumId         | NULL                       | Acknowledge list was written |
+| redirectWrite      | redirectId, list | method{redirectWriteReply} | Redirect a client request    |
+| redirectWriteReply | redirectId       | NULL                       | Answer to redirection        |

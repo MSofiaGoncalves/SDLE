@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.zeromq.ZMQ;
 import server.Store;
+import server.connections.NodeConnector;
 import server.db.Database;
 import server.model.Message;
 import server.model.QuorumStatus;
@@ -27,7 +28,6 @@ public class NodeHandler implements Runnable {
      */
     public NodeHandler(ZMQ.Socket socket, String message) {
         this.messageRaw = message;
-        System.out.println("msg in handler: " + message);
         try {
             this.message = new Gson().fromJson(messageRaw, Message.class);
         }
@@ -44,7 +44,7 @@ public class NodeHandler implements Runnable {
         Map<String, Function<Void, Void>> functionMap = new HashMap<>();
         functionMap.put("write", this::writeList);
         functionMap.put("redirectWrite", this::redirectWrite);
-        functionMap.put("quorumAck", this::quorumAck);
+        functionMap.put("writeAck", this::writeAck);
         functionMap.put("redirectWriteReply", this::redirectWriteReply);
 
         if (message == null || message.getMethod() == null) {
@@ -54,20 +54,25 @@ public class NodeHandler implements Runnable {
         functionMap.get(message.getMethod()).apply(null);
     }
 
+    /**
+     * List write request from another node. (Quorum) <br>
+     * Writes the list to the db and sends an ACK.
+     */
     private Void writeList(Void unused) {
         Store.getLogger().info("Writing list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
-        socket.send(String.format(
-                "{\"method\":\"quorumAck\", \"quorumId\":%s}",
-                message.getQuorumId()).getBytes(ZMQ.CHARSET), 0);
+        new NodeConnector(socket).sendListWriteAck(message.getQuorumId());
         return null;
     }
 
-    private Void quorumAck(Void unused) {
+    /**
+     * Receive write ack from another node. (Quorum) <br>
+     * Update quorum status on the store.
+     */
+    private Void writeAck(Void unused) {
         Store store = Store.getInstance();
-        Store.getLogger().info("Received quorum ack: " + message.getQuorumId());
+        Store.getLogger().info("Received write ack: " + message.getQuorumId());
         QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
-        System.out.println("quorumStatus: " + quorumStatus);
         if (quorumStatus != null) {
             if (quorumStatus.increment()) {
                 store.getQuorums().remove(message.getQuorumId());
@@ -76,6 +81,10 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Receive a redirect write request from another node. <br>
+     * Inits a quorum.
+     */
     private Void redirectWrite(Void unused) {
         Store.getLogger().info("Received list write redirect: " + message.getList().getId());
         QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
@@ -85,6 +94,10 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Handles a redirect reply. <br>
+     * Sends a reply to the client.
+     */
     private Void redirectWriteReply(Void unused) {
         Store store = Store.getInstance();
         ZMQ.Socket socket =  store.getClientBroker();
