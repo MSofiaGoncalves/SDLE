@@ -18,6 +18,7 @@ enum QuorumMode {
 public class QuorumHandler implements Runnable {
     private byte[] clientIdentity;
     private ZMQ.Socket nodeSocket;
+    private String redirectId;
     private String listId;
     private QuorumMode operation;
     private ShoppingList list;
@@ -47,6 +48,10 @@ public class QuorumHandler implements Runnable {
         this.nodeSocket = nodeSocket;
     }
 
+    public void setRedirectId(String redirectId) {
+        this.redirectId = redirectId;
+    }
+
     @Override
     public void run() {
         if (clientIdentity == null && nodeSocket == null) {
@@ -72,7 +77,7 @@ public class QuorumHandler implements Runnable {
         int writeN = Integer.parseInt(Store.getProperty("quorumWrites"));
         System.out.println("identity" + clientIdentity);
         QuorumStatus quorumStatus =
-                new QuorumStatus(writeN, nodeSocket, clientIdentity);
+                new QuorumStatus(writeN, nodeSocket, clientIdentity, redirectId);
         quorumStatus.increment();
         store.getQuorums().put(quorumStatus.getId(), quorumStatus);
 

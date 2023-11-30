@@ -50,19 +50,19 @@ public class NodeConnector {
 
      */
 
-    public ZMQ.Socket sendRedirectWrite(ShoppingList list, byte[] identity) {
+    public ZMQ.Socket sendRedirectWrite(ShoppingList list, String identity) {
         String listJSON = new Gson().toJson(list);
         String request = String.format(
-                "{\"method\":\"redirectWrite\", \"clientIdentity\":\"%s\", \"list\":%s}",
-                new String(identity, ZMQ.CHARSET), listJSON);
+                "{\"method\":\"redirectWrite\", \"redirectId\":\"%s\", \"list\":%s}",
+                identity, listJSON);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
         return socket;
     }
 
-    public ZMQ.Socket sendRedirectWriteReply(byte[] identity) {
+    public ZMQ.Socket sendRedirectWriteReply(String redirectId) {
         String request = String.format(
-                "{\"method\":\"redirectWriteReply\", \"clientIdentity\": \"%s\"}",
-                identity);
+                "{\"method\":\"redirectWriteReply\", \"redirectId\": \"%s\"}",
+                redirectId);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
         return socket;
     }

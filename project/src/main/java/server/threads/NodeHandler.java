@@ -80,17 +80,19 @@ public class NodeHandler implements Runnable {
         Store.getLogger().info("Received list write redirect: " + message.getList().getId());
         QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
         quorum.setNodeSocket(socket);
-        System.out.println("REDIRECTING->client identity: " + message.getClientIdentity());
-        quorum.setClientIdentity(message.getClientIdentity().getBytes(ZMQ.CHARSET));
+        quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
     }
 
     private Void redirectWriteReply(Void unused) {
-        ZMQ.Socket socket =  Store.getInstance().getClientBroker();
-        System.out.println("redirectWriteReply: " + message.getClientIdentity().getBytes(ZMQ.CHARSET));
+        Store store = Store.getInstance();
+        ZMQ.Socket socket =  store.getClientBroker();
 
-        socket.send(message.getClientIdentity().getBytes(ZMQ.CHARSET), ZMQ.SNDMORE);
+        byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
+        store.getOngoingRedirects().remove(message.getRedirectId());
+
+        socket.send(clientIdentity, ZMQ.SNDMORE);
         socket.send("".getBytes(), ZMQ.SNDMORE);
         socket.send("", 0);
         return null;

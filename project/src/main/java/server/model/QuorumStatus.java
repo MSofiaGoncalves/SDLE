@@ -10,13 +10,15 @@ public class QuorumStatus {
     private String id;
     private ZMQ.Socket nodeSocket; // for redirect
     private byte[] identity; // for client responses
+    private String redirectId;
 
-    public QuorumStatus(int quorumSize, ZMQ.Socket nodeSocket, byte[] identity) {
+    public QuorumStatus(int quorumSize, ZMQ.Socket nodeSocket, byte[] identity, String redirectId) {
         this.quorumSize = quorumSize;
         this.currentSize = 0;
         this.id = java.util.UUID.randomUUID().toString();
         this.nodeSocket = nodeSocket;
         this.identity = identity;
+        this.redirectId = redirectId;
     }
 
     public synchronized boolean increment() {
@@ -38,7 +40,7 @@ public class QuorumStatus {
 
     private void finish() {
         if (this.nodeSocket != null) {
-            new NodeConnector(this.nodeSocket).sendRedirectWriteReply(this.identity);
+            new NodeConnector(this.nodeSocket).sendRedirectWriteReply(this.redirectId);
         } else {
             replyClient("");
         }

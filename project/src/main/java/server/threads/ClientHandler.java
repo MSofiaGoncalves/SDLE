@@ -60,7 +60,9 @@ public class ClientHandler implements Runnable {
         } else { // Not part of ring, redirect
             String node = nodes.iterator().next();
             Store.getLogger().info("Redirecting list to node: " + node);
-            new NodeConnector(node).sendRedirectWrite(message.getList(), identity);
+            String redirectId = java.util.UUID.randomUUID().toString();
+            Store.getInstance().getOngoingRedirects().put(redirectId, identity);
+            new NodeConnector(node).sendRedirectWrite(message.getList(), redirectId);
         }
 
         return null;

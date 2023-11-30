@@ -17,7 +17,7 @@ public class Message {
     private ShoppingList list;
     private String address; // use to identify clients
     private String quorumId;
-    private String clientIdentity;
+    private String redirectId;
 
     public Message(String message) {
         new Gson().fromJson(message, Message.class);
@@ -39,8 +39,8 @@ public class Message {
         return quorumId;
     }
 
-    public String getClientIdentity() {
-        return clientIdentity;
+    public String getRedirectId() {
+        return redirectId;
     }
 
     public String getAddress() {

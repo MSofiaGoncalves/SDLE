@@ -30,12 +30,14 @@ public class Store {
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
     private HashRing hashRing;
     private ConcurrentHashMap<String, QuorumStatus> quorums;
+    private ConcurrentHashMap<String, byte[]> ongoingRedirects;
 
     public static Logger logger;
 
     private Store() {
         nodes = new ConcurrentHashMap<>();
         quorums = new ConcurrentHashMap<>();
+        ongoingRedirects = new ConcurrentHashMap<>();
         initProperties();
     }
 
@@ -126,6 +128,10 @@ public class Store {
 
     public ConcurrentHashMap<String, QuorumStatus> getQuorums() {
         return quorums;
+    }
+
+    public ConcurrentHashMap<String, byte[]> getOngoingRedirects() {
+        return ongoingRedirects;
     }
 
     public static String getProperty(String key) {
