@@ -1,4 +1,4 @@
-package CRDTs;
+package crdts;
 
 import java.util.Objects;
 

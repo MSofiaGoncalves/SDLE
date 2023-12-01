@@ -1,4 +1,4 @@
-package CRDTs;
+package crdts;
 
 import java.util.HashMap;
 import java.util.Map;

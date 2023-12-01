@@ -1,4 +1,4 @@
-package CRDTs;
+package crdts;
 
 import java.util.HashSet;
 import java.util.Iterator;
