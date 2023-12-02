@@ -114,12 +114,14 @@ public class QuorumHandler implements Runnable {
         int readN = Integer.parseInt(Store.getProperty("quorumReads"));
         QuorumStatus quorumStatus =
                 new QuorumStatus(readN, nodeSocket, clientIdentity, redirectId);
-        quorumStatus.increment();
 
         // Read from local database
         Store.getLogger().info("Reading list: " + listId + " from database.");
         list = Database.getInstance().readList(listId);
+        if (list == null)
+            Store.getLogger().info("List: " + listId + " not found in database.");
         quorumStatus.addList(list);
+        if (quorumStatus.increment()) return;
 
         store.getQuorums().put(quorumStatus.getId(), quorumStatus);
 

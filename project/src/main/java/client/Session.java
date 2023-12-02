@@ -33,9 +33,7 @@ public class Session {
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
-        ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = new ShoppingList(name);
-        connector.writeList(shoppingList);
         this.lists.put(shoppingList.getId(), shoppingList);
         return shoppingList;
     }
@@ -59,15 +57,11 @@ public class Session {
      * @return A map of all lists.
      */
     public HashMap<String, ShoppingList> loadListsFromFiles() {
-        System.out.println("Load username: " + username);
         HashMap<String, ShoppingList> shoppingLists = new HashMap<>();
         File folder = new File("src/main/java/client/lists/" + username);
-        System.out.println("function: " + folder);
         if (folder.exists() && folder.isDirectory()) {
-            System.out.println("folder not null");
             File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
             if (files != null) {
-                System.out.println("files not null");
                 for (File file : files) {
                     ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
                     if (list != null) {
@@ -80,7 +74,6 @@ public class Session {
     }
 
     public List<ShoppingList> getLists() {
-        System.out.println("GET LIST: " + this.lists.size());
         return new ArrayList<>(this.lists.values());
     }
 
@@ -94,7 +87,6 @@ public class Session {
     }
 
     public void setUsername(String name){
-        System.out.println("Set username: " + name);
         if (instance == null) {
             instance = new Session();
         }

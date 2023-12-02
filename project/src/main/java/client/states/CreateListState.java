@@ -14,10 +14,7 @@ public class CreateListState implements State {
         Scanner in = new Scanner(System.in);
         String name = in.nextLine();
 
-        System.out.println("after name read");
         ShoppingList shoppingList = Session.getSession().createList(name);
-        shoppingList.saveToFile();
-        System.out.println("after create list");
 
         return new ListState(shoppingList);
     }
