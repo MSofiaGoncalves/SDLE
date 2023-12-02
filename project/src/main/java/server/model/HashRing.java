@@ -86,7 +86,7 @@ public class HashRing {
      * @param key The key to get the nodes for.
      * @return The nodes that hold the key.
      */
-    public String[] getNodes(String key) {
+    public Set<String> getNodes(String key) {
         Long hash = getHash(key);
         if (!ring.containsKey(hash)) {
             hash = ring.floorKey(hash);
@@ -112,7 +112,7 @@ public class HashRing {
             }
         }
 
-        return nodes.toArray(new String[0]);
+        return nodes;
     }
 
     /**

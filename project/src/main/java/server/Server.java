@@ -1,10 +1,8 @@
 package server;
 
 import org.zeromq.ZMQ;
-import server.connections.ClientHandler;
-import server.connections.NodeHandler;
-
-import java.util.logging.Logger;
+import server.threads.ClientHandler;
+import server.threads.NodeHandler;
 
 public class Server {
 
@@ -13,6 +11,7 @@ public class Server {
 
         Store store = Store.getInstance();
         store.initConnections();
+        checkParams();
         ZMQ.Socket clientBroker = store.getClientBroker();
 
         ZMQ.Poller poller = store.getContext().createPoller(1);
@@ -58,6 +57,25 @@ public class Server {
         store.setProperty("clienthost", args[0]);
         if (args.length >= 2) {
             store.setProperty("nodehost", args[1]);
+        }
+    }
+
+    /**
+     * Checks if the parameters are valid. <br>
+     */
+    private static void checkParams() {
+        Store store = Store.getInstance();
+        int quorumN = Integer.parseInt(Store.getProperty("quorumNumber"));
+        int quorumW = Integer.parseInt(Store.getProperty("quorumWrites"));
+        int quorumR = Integer.parseInt(Store.getProperty("quorumReads"));
+        if (quorumN < quorumW) {
+            Store.logger.warning("Quorum number is less than quorum writes. Setting quorum number to quorum writes.");
+            store.setProperty("quorumNumber", store.getProperty("quorumWrites"));
+            quorumN = quorumW;
+        }
+        if (quorumN < quorumR) {
+            Store.logger.warning("Quorum number is less than quorum reads. Setting quorum number to quorum reads.");
+            store.setProperty("quorumNumber", store.getProperty("quorumReads"));
         }
     }
 }

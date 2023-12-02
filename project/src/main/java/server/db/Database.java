@@ -73,10 +73,9 @@ public class Database {
         try {
             collection.insertOne(list);
         } catch (com.mongodb.MongoWriteException e) {
-            // duplicate list
-            System.out.println("List already exists" + e.getMessage());
             if (e.getCode() == 11000) {
-                return false;
+                Bson filter = Filters.eq("id", list.getId());
+                collection.replaceOne(filter, list);
             }
         }
         return true;
@@ -88,36 +87,13 @@ public class Database {
      * @param id The id of the list to get.
      * @return The list if it exists, null otherwise.
      */
-    public ShoppingList getList(String id) {
+    public ShoppingList readList(String id) {
         MongoCollection<ShoppingList> collection = getCollection();
 
         Bson filter = Filters.eq("id", id);
         FindIterable<ShoppingList> documents = collection.find(filter);
 
         return documents.first();
-    }
-
-    /**
-     * Update a list in the database.
-     *
-     * @param list The list to update.
-     */
-    public void updateList(ShoppingList list) {
-        MongoCollection<ShoppingList> collection = getCollection();
-        Bson filter = Filters.eq("id", list.getId());
-        collection.replaceOne(filter, list);
-    }
-
-    /**
-     * Remove a list from the database.
-     *
-     * @param id The id of the list to remove.
-     */
-    public void removeList(String id) {
-        MongoCollection<ShoppingList> collection = getCollection();
-
-        Bson filter = Filters.eq("id", id);
-        collection.deleteOne(filter);
     }
 
     /**
