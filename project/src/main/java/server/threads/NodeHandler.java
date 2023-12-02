@@ -8,6 +8,7 @@ import server.connections.NodeConnector;
 import server.db.Database;
 import server.model.Message;
 import server.model.QuorumStatus;
+import server.model.ShoppingList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,9 +44,14 @@ public class NodeHandler implements Runnable {
     public void run() {
         Map<String, Function<Void, Void>> functionMap = new HashMap<>();
         functionMap.put("write", this::writeList);
-        functionMap.put("redirectWrite", this::redirectWrite);
         functionMap.put("writeAck", this::writeAck);
+        functionMap.put("redirectWrite", this::redirectWrite);
         functionMap.put("redirectWriteReply", this::redirectWriteReply);
+
+        functionMap.put("read", this::readList);
+        functionMap.put("readAck", this::readAck);
+        functionMap.put("redirectRead", this::redirectRead);
+        functionMap.put("redirectReadReply", this::redirectReadReply);
 
         if (message == null || message.getMethod() == null) {
             return;
@@ -53,6 +59,8 @@ public class NodeHandler implements Runnable {
 
         functionMap.get(message.getMethod()).apply(null);
     }
+
+    /*************** Write ****************/
 
     /**
      * List write request from another node. (Quorum) <br>
@@ -108,6 +116,67 @@ public class NodeHandler implements Runnable {
         socket.send(clientIdentity, ZMQ.SNDMORE);
         socket.send("".getBytes(), ZMQ.SNDMORE);
         socket.send("", 0);
+        return null;
+    }
+
+    /*************** Read ****************/
+
+    /**
+     * List read request from another node. (Quorum) <br>
+     * Reads the list from the db and sends it.
+     */
+    private Void readList(Void unused) {
+        Store.getLogger().info("Reading list, " + message.getListId() + " from database.");
+        ShoppingList list = Database.getInstance().readList(message.getListId());
+        new NodeConnector(socket).sendListReadAck(list, message.getQuorumId());
+        return null;
+    }
+
+    /**
+     * Receive read ack from another node. (Quorum) <br>
+     * Update quorum status on the store.
+     */
+    private Void readAck(Void unused) {
+        Store store = Store.getInstance();
+        Store.getLogger().info("Received read ack: " + message.getQuorumId());
+        QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
+        if (quorumStatus != null) {
+            quorumStatus.addList(message.getList());
+            if (quorumStatus.increment()) {
+                store.getQuorums().remove(message.getQuorumId());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Receive a redirect read request from another node. <br>
+     * Inits a quorum.
+     */
+    private Void redirectRead(Void unused) {
+        Store.getLogger().info("Received list read redirect: " + message.getListId());
+        QuorumHandler quorum = new QuorumHandler(message.getListId(), QuorumMode.READ);
+        quorum.setNodeSocket(socket);
+        quorum.setRedirectId(message.getRedirectId());
+        quorum.run();
+        return null;
+    }
+
+    /**
+     * Handles a read redirect reply. <br>
+     * Sends a reply to the client.
+     */
+    private Void redirectReadReply(Void unused) {
+        Store store = Store.getInstance();
+        ZMQ.Socket socket =  store.getClientBroker();
+
+        byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
+        store.getOngoingRedirects().remove(message.getRedirectId());
+
+        String listJSON = new Gson().toJson(message.getList());
+        socket.send(clientIdentity, ZMQ.SNDMORE);
+        socket.send("".getBytes(), ZMQ.SNDMORE);
+        socket.send(listJSON, 0);
         return null;
     }
 }

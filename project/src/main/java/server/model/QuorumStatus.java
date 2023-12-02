@@ -14,6 +14,7 @@ public class QuorumStatus {
     private final ZMQ.Socket nodeSocket; // for redirect
     private final byte[] identity; // for client responses
     private final String redirectId;
+    private ShoppingList list; // used for reads
 
     /**
      * Creates a new QuorumStatus. <br>
@@ -57,23 +58,42 @@ public class QuorumStatus {
         return this.currentSize >= this.quorumSize;
     }
 
+    public void addList(ShoppingList list) {
+        // TODO: merge lists (crdts)
+        this.list = list;
+    }
+
     /**
      * Finish up the quorum. Reply to the client or to other node if the request
      * came from a redirect.
      */
     private void finish() {
+        if (this.list == null) finishWrite();
+        else finishRead();
+    }
+
+    private void finishWrite() {
         if (this.nodeSocket != null) {
             new NodeConnector(this.nodeSocket).sendRedirectWriteReply(this.redirectId);
         } else {
-            replyClient("");
+            ZMQ.Socket socket =  Store.getInstance().getClientBroker();
+
+            socket.send(identity, ZMQ.SNDMORE);
+            socket.send("".getBytes(), ZMQ.SNDMORE);
+            socket.send("", 0);
         }
     }
 
-    private void replyClient(String response) {
-        ZMQ.Socket socket =  Store.getInstance().getClientBroker();
+    private void finishRead() {
+        if (this.nodeSocket != null) {
+            new NodeConnector(this.nodeSocket).sendRedirectReadReply(this.list, this.redirectId);
+        } else {
+            ZMQ.Socket socket =  Store.getInstance().getClientBroker();
 
-        socket.send(identity, ZMQ.SNDMORE);
-        socket.send("".getBytes(), ZMQ.SNDMORE);
-        socket.send(response, 0);
+            String listJSON = new com.google.gson.Gson().toJson(this.list);
+            socket.send(identity, ZMQ.SNDMORE);
+            socket.send("".getBytes(), ZMQ.SNDMORE);
+            socket.send(listJSON, 0);
+        }
     }
 }

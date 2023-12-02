@@ -26,6 +26,11 @@ public class QuorumHandler implements Runnable {
     private QuorumMode operation;
     private ShoppingList list;
 
+    /**
+     * Creates a new QuorumHandler. Used for READ mode.
+     * @param listId The id list to write.
+     * @param operation The operation to perform, must be READ.
+     */
     public QuorumHandler(String listId, QuorumMode operation) {
         if (operation == QuorumMode.WRITE) {
             throw new IllegalArgumentException("Cannot write a list with only the id.");
@@ -72,13 +77,6 @@ public class QuorumHandler implements Runnable {
         }
     }
 
-    private void read() {
-        // TODO: reading
-        Set<String> nodes = Store.getInstance().getHashRing().getNodes(listId);
-        int r = Integer.parseInt(Store.getProperty("quorumReads"));
-
-    }
-
     /**
      * Quorum write leader: <br>
      *    - Create quorum status <br>
@@ -107,6 +105,33 @@ public class QuorumHandler implements Runnable {
                 continue;
             }
             new NodeConnector(node).sendListWrite(list, quorumStatus.getId());
+        }
+    }
+
+    private void read() {
+        // Create quorum status
+        Store store = Store.getInstance();
+        int readN = Integer.parseInt(Store.getProperty("quorumReads"));
+        QuorumStatus quorumStatus =
+                new QuorumStatus(readN, nodeSocket, clientIdentity, redirectId);
+        quorumStatus.increment();
+
+        // Read from local database
+        Store.getLogger().info("Reading list: " + listId + " from database.");
+        list = Database.getInstance().readList(listId);
+        quorumStatus.addList(list);
+
+        store.getQuorums().put(quorumStatus.getId(), quorumStatus);
+
+        // Inform w - 1 other nodes
+        Set<String> nodes = store.getHashRing().getNodes(listId);
+        Iterator<String> iterator = nodes.iterator();
+        while (iterator.hasNext()) {
+            String node = iterator.next();
+            if (node.equals(Store.getProperty("nodehost"))) {
+                continue;
+            }
+            new NodeConnector(node).sendListRead(listId, quorumStatus.getId());
         }
     }
 }

@@ -88,7 +88,7 @@ public class Database {
      * @param id The id of the list to get.
      * @return The list if it exists, null otherwise.
      */
-    public ShoppingList getList(String id) {
+    public ShoppingList readList(String id) {
         MongoCollection<ShoppingList> collection = getCollection();
 
         Bson filter = Filters.eq("id", id);

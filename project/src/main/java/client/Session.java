@@ -1,9 +1,6 @@
 package client;
 
 import client.model.ShoppingList;
-import java.util.Scanner;
-import org.zeromq.ZContext;
-import org.zeromq.ZMQ;
 
 import java.io.File;
 import java.util.*;
@@ -50,7 +47,7 @@ public class Session {
      */
     public ShoppingList getList(String id) {
         ServerConnector connector = Session.getConnector();
-        ShoppingList shoppingList = connector.getList(id);
+        ShoppingList shoppingList = connector.readList(id);
         if (shoppingList != null) {
             this.lists.put(shoppingList.getId(), shoppingList);
         }

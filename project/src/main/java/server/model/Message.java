@@ -27,6 +27,11 @@ public class Message {
         return method;
     }
 
+    /**
+     * Get the id of the list to get. <br>
+     * Note that this is different from getList().getId() because the message may not contain a list.
+     * @return
+     */
     public String getListId() {
         return listId;
     }

@@ -39,13 +39,14 @@ public class ClientHandler implements Runnable {
 
         Map<String, Function<Void, Void>> functionMap = new HashMap<>();
         functionMap.put("write", this::writeList);
-        functionMap.put("get", this::getList);
+        functionMap.put("read", this::readList);
 
         functionMap.get(message.getMethod()).apply(null);
     }
 
     /**
-     * Inserts a list into the database.
+     * Write list request from a client. <br>
+     * The server either starts a quorum or redirects it to the node that should.
      */
     private Void writeList(Void unused) {
         Store.getLogger().info("List writing request: " + message.getList().getId());
@@ -59,7 +60,7 @@ public class ClientHandler implements Runnable {
             quorum.run();
         } else { // Not part of ring, redirect
             String node = nodes.iterator().next();
-            Store.getLogger().info("Redirecting list to node: " + node);
+            Store.getLogger().info("Redirecting list write to node: " + node);
             String redirectId = java.util.UUID.randomUUID().toString();
             Store.getInstance().getOngoingRedirects().put(redirectId, identity);
             new NodeConnector(node).sendRedirectWrite(message.getList(), redirectId);
@@ -69,12 +70,27 @@ public class ClientHandler implements Runnable {
     }
 
     /**
-     * Gets a list from the database.
+     * Read list request from a client. <br>
+     * The server either starts a quorum or redirects it to the node that should.
      */
-    private Void getList(Void unused) {
-        ShoppingList list = Database.getInstance().getList(message.getListId());
-        // TODO reading
-        //reply(new Gson().toJson(list));
+    private Void readList(Void unused) {
+        Store.getLogger().info("List reading request: " + message.getListId());
+
+        HashRing ring = Store.getInstance().getHashRing();
+        Set<String> nodes = ring.getNodes(message.getListId());
+
+        if (nodes.contains(Store.getProperty("nodehost"))) { // Part of Ring
+            QuorumHandler quorum = new QuorumHandler(message.getListId(), QuorumMode.READ);
+            quorum.setClientIdentity(identity);
+            quorum.run();
+        } else { // Not part of ring, redirect
+            String node = nodes.iterator().next();
+            Store.getLogger().info("Redirecting list read to node: " + node);
+            String redirectId = java.util.UUID.randomUUID().toString();
+            Store.getInstance().getOngoingRedirects().put(redirectId, identity);
+            new NodeConnector(node).sendRedirectRead(message.getListId(), redirectId);
+        }
+
         return null;
     }
 }

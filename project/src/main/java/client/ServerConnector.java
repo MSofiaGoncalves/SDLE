@@ -5,8 +5,6 @@ import com.google.gson.Gson;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
-import server.Store;
-
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,8 +52,8 @@ public class ServerConnector {
      * @param id The id of the list to get.
      * @return The list with the given id.
      */
-    public ShoppingList getList(String id) {
-        String request = String.format("{\"method\":\"get\", \"id\":\"%s\"}", id);
+    public ShoppingList readList(String id) {
+        String request = String.format("{\"method\":\"read\", \"listId\":\"%s\"}", id);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
         byte[] reply = socket.recv(0);
