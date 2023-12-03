@@ -5,8 +5,6 @@ import com.google.gson.Gson;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
-import server.Store;
-
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,11 +37,11 @@ public class ServerConnector {
     }
 
     /**
-     * Sends a request to the server to insert a list.
-     * @param shoppingList The list to insert.
+     * Sends a request to the server to write a list.
+     * @param shoppingList The list to write.
      */
-    public void insertList(ShoppingList shoppingList) {
-        String request = String.format("{\"method\":\"insert\", \"list\":%s}", new Gson().toJson(shoppingList));
+    public void writeList(ShoppingList shoppingList) {
+        String request = String.format("{\"method\":\"write\", \"list\":%s}", new Gson().toJson(shoppingList));
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
         byte[] reply = socket.recv(0);
@@ -54,8 +52,8 @@ public class ServerConnector {
      * @param id The id of the list to get.
      * @return The list with the given id.
      */
-    public ShoppingList getList(String id) {
-        String request = String.format("{\"method\":\"get\", \"id\":\"%s\"}", id);
+    public ShoppingList readList(String id) {
+        String request = String.format("{\"method\":\"read\", \"listId\":\"%s\"}", id);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
         byte[] reply = socket.recv(0);

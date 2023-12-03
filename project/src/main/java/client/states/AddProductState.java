@@ -1,5 +1,6 @@
 package client.states;
 
+import client.Session;
 import client.model.ShoppingList;
 
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ public class AddProductState implements State {
         Integer quantity = in.nextInt();
 
         this.shoppingList.addProduct(name, quantity);
-        this.shoppingList.saveToFile();
 
         return new ListState(this.shoppingList);
     }

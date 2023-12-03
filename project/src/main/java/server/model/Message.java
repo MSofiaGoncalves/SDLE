@@ -13,8 +13,11 @@ import com.google.gson.Gson;
  */
 public class Message {
     private String method;
-    private String id;
+    private String listId;
     private ShoppingList list;
+    private String address; // use to identify clients
+    private String quorumId;
+    private String redirectId;
 
     public Message(String message) {
         new Gson().fromJson(message, Message.class);
@@ -24,11 +27,28 @@ public class Message {
         return method;
     }
 
-    public String getId() {
-        return id;
+    /**
+     * Get the id of the list to get. <br>
+     * Note that this is different from getList().getId() because the message may not contain a list.
+     * @return
+     */
+    public String getListId() {
+        return listId;
     }
 
     public ShoppingList getList() {
         return list;
+    }
+
+    public String getQuorumId() {
+        return quorumId;
+    }
+
+    public String getRedirectId() {
+        return redirectId;
+    }
+
+    public String getAddress() {
+        return address;
     }
 }

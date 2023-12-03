@@ -36,7 +36,6 @@ public class EditProductState implements State{
             this.shoppingList.buyProductQuantity(name, quantity);
         }
 
-        this.shoppingList.saveToFile();
         return new ListState(this.shoppingList);
     }
 }

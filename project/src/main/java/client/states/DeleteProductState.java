@@ -25,7 +25,6 @@ public class DeleteProductState implements State {
         }
 
         this.shoppingList.deleteProduct(name);
-        this.shoppingList.saveToFile();
 
         return new ListState(this.shoppingList);
     }

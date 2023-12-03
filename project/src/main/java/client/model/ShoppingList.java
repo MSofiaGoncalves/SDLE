@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import client.ServerConnector;
 import client.Session;
 import client.states.AddProductState;
 import client.utils.TablePrinter;
@@ -34,6 +35,8 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(id);
+        save();
+
     }
 
     public ShoppingList(String id, String name) {
@@ -41,8 +44,9 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(id);
-
+        saveToFile();
     }
+
 
     public String getId() {
         return this.id;
@@ -69,6 +73,7 @@ public class ShoppingList {
             products.put(p.getName(), p);
             addWins.add(p.getName());
         }
+        save();
     }
 
     // add or remove quantity
@@ -101,6 +106,7 @@ public class ShoppingList {
         else{
             System.out.println("Invalid product.");
         }
+        save();
     }
 
     public boolean productExists(String name){
@@ -114,6 +120,7 @@ public class ShoppingList {
         else{
             System.out.println("Invalid product.");
         }
+        save();
     }
 
     public void printProducts() {
@@ -132,7 +139,27 @@ public class ShoppingList {
         return !this.products.isEmpty();
     }
 
-    public void saveToFile() {
+
+    public Boolean hasProduct(String name){
+        return this.products.containsKey(name);
+    }
+
+    public void deleteProduct(String name){
+        this.products.remove(name);
+        save();
+    }
+
+    public static ShoppingList loadFromFile(String fileName) {
+        try (Reader reader = new FileReader(fileName)) {
+            Gson gson = new Gson();
+            return gson.fromJson(reader, ShoppingList.class);
+        } catch (IOException e) {
+            System.out.println("Error loading from file.");
+            return null;
+        }
+    }
+
+    private void saveToFile() {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
@@ -166,24 +193,15 @@ public class ShoppingList {
         }
     }
 
-    public Boolean hasProduct(String name){
-        return this.products.containsKey(name);
-    }
 
-    public void deleteProduct(String name){
-        this.products.remove(name);
-        addWins.rm(name);
-    }
 
-    public static ShoppingList loadFromFile(String fileName) {
-        try (Reader reader = new FileReader(fileName)) {
-            Gson gson = new Gson();
-            return gson.fromJson(reader, ShoppingList.class);
-        } catch (IOException e) {
-            System.out.println("Error loading from file.");
-            return null;
-        }
+    /**
+     * Saves the list to the server and local storage. <br>
+     * Should be called everytime the list is modified.
+     */
+    private void save() {
+        Session.getConnector().writeList(this);
+        saveToFile();
     }
-
 
 }
