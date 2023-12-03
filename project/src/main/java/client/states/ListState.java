@@ -39,8 +39,8 @@ public class ListState implements State {
             this.shoppingList.printProducts();
         }
 
-        return displayOptions(List.of("Add item", "Delete item", "Add quantity", "Buy quantity", "Go back", "Exit"),
-                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new DeleteProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
+        return displayOptions(List.of("Add item", "Delete item", "Add quantity", "Remove quantity",  "Buy quantity", "Go back", "Exit"),
+                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new DeleteProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "remove"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
     }
 }
 

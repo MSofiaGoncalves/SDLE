@@ -12,8 +12,8 @@ public class GCounter {
         this.counters = new HashMap<>();
     }
 
-    public void increment() {
-        counters.put(id, counters.getOrDefault(id, 0) + 1);
+    public void increment(Integer value) {
+        counters.put(id, counters.getOrDefault(id, 0) + value);
     }
 
     public int value() {

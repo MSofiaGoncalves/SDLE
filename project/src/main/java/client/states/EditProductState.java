@@ -28,10 +28,11 @@ public class EditProductState implements State{
         }
         Integer quantity = in.nextInt();
 
-        if(action.equals("add")){
+        if(action.equals("add")) {
             this.shoppingList.addProductQuantity(name, quantity);
-        }
-        else{
+        } else if (action.equals("remove")) {
+            this.shoppingList.removeProductQuantity(name, quantity);
+        } else{
             this.shoppingList.buyProductQuantity(name, quantity);
         }
 

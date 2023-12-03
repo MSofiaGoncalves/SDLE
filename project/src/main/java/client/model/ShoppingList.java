@@ -13,6 +13,7 @@ import client.states.AddProductState;
 import client.utils.TablePrinter;
 import com.google.gson.*;
 import crdts.AddWins;
+import crdts.PNCounter;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -40,13 +41,8 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(id);
-    }
 
-//    public ShoppingList(String id, String name, Map<String, ProductQuantity> products) {
-//        this.id = id;
-//        this.name = name;
-//        this.products = products;
-//    }
+    }
 
     public String getId() {
         return this.id;
@@ -61,22 +57,46 @@ public class ShoppingList {
     }
 
     public void addProduct(String name, int quantity) {
+        if(quantity < 0){
+            System.out.println("Invalid quantity.");
+            return;
+        }
         if (products.containsKey(name)) {
             addProductQuantity(name, quantity);
         }
         else {
-            ProductQuantity quantities = new ProductQuantity(quantity, 0);
-            Product p = new Product(name, quantities);
+            Product p = new Product(name, quantity);
             products.put(p.getName(), p);
             addWins.add(p.getName());
         }
     }
 
+    // add or remove quantity
     public void addProductQuantity(String name, int quantity) {
-        if(productExists(name)) {
-            ProductQuantity currQuantities = products.get(name).getProductQuantity();
-            currQuantities.addToList(quantity);
-            products.get(name).setProductQuantity(currQuantities);
+        if(quantity < 0){
+            System.out.println("Invalid quantity.");
+            return;
+        }
+        if(productExists(name)){
+            products.get(name).addQuantity(quantity);
+        }
+        else{
+            System.out.println("Invalid product.");
+        }
+    }
+
+    public void removeProductQuantity(String name, int quantity) {
+        if(quantity < 0){
+            System.out.println("Invalid quantity.");
+            return;
+        }
+        if(productExists(name)){
+            if(quantity >= products.get(name).getQuantity()){
+                deleteProduct(name);
+            }
+            else {
+                products.get(name).removeQuantity(quantity);
+            }
         }
         else{
             System.out.println("Invalid product.");
@@ -89,9 +109,7 @@ public class ShoppingList {
 
     public void buyProductQuantity(String name, int quantity) {
         if(productExists(name)) {
-            ProductQuantity currQuantities = products.get(name).getProductQuantity();
-            currQuantities.buyQuantity(quantity);
-            products.get(name).setProductQuantity(currQuantities);
+            products.get(name).buyQuantity(quantity);
         }
         else{
             System.out.println("Invalid product.");
@@ -104,8 +122,7 @@ public class ShoppingList {
 
         for (Map.Entry<String, Product> product : products.entrySet()) {
             String productName = product.getKey();
-            ProductQuantity quantities = product.getValue().getProductQuantity();
-            data.add(List.of(productName, Integer.toString(quantities.getQuantity()), Integer.toString(quantities.getQuantityBought())));
+            data.add(List.of(productName, Integer.toString(product.getValue().getQuantity()), Integer.toString(product.getValue().getQuantityBought())));
         }
 
         TablePrinter.printTable(data);
@@ -148,7 +165,6 @@ public class ShoppingList {
             System.out.println("Error saving to file asynchronously: " + e.getMessage());
         }
     }
-
 
     public Boolean hasProduct(String name){
         return this.products.containsKey(name);

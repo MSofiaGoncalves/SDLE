@@ -1,24 +1,18 @@
 package client.model;
 
+import crdts.GCounter;
+import crdts.PNCounter;
+
 public class Product {
-    //private int quantity;
-    //private int quantityBought;
-    private ProductQuantity productQuantity;
     private String name;
+    public PNCounter pnCounter; // related with quantityBought
+    public GCounter gCounter; // related with quantity
 
-    public Product(String name, ProductQuantity productQuantity) {
+    public Product(String name, int quantity) {
         this.name = name;
-        //this.quantity = quantity;
-        //this.quantityBought = quantityBought;
-        this.productQuantity = productQuantity;
-    }
-
-    public ProductQuantity getProductQuantity() {
-        return productQuantity;
-    }
-
-    public void setProductQuantity(ProductQuantity productQuantity) {
-        this.productQuantity = productQuantity;
+        this.pnCounter = new PNCounter(name);
+        this.pnCounter.increment(quantity);
+        this.gCounter = new GCounter(name);
     }
 
     public String getName() {
@@ -27,6 +21,30 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    // when adding a product, we increment the quantity and call the PNCounter for it
+    public void addQuantity(int value) {
+        this.pnCounter.increment(value);
+    }
+
+    // when removing a product quantity, we decrement the quantity and call the PNCounter for it
+    public void removeQuantity(int value) {
+        this.pnCounter.decrement(value);
+    }
+
+    // the quantity decreases and quantity bought increases
+    public void buyQuantity(int value){
+        this.gCounter.increment(value);
+        this.pnCounter.decrement(value);
+    }
+
+    public int getQuantity(){
+        return this.pnCounter.value();
+    }
+
+    public int getQuantityBought(){
+        return this.gCounter.value();
     }
 
     /*

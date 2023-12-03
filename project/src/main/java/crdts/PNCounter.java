@@ -12,12 +12,12 @@ public class PNCounter {
         this.dec = new GCounter(id);
     }
 
-    public void increment() {
-        inc.increment();
+    public void increment(Integer value) {
+        inc.increment(value);
     }
 
-    public void decrement() {
-        dec.increment();
+    public void decrement(Integer value) {
+        dec.increment(value);
     }
 
     public int value() {
