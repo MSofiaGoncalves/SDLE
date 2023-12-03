@@ -1,6 +1,5 @@
-package server.utils;
+package crdts.utils;
 
-import java.util.HashSet;
 public class Tuple<X, Y> {
 
     public final X x;

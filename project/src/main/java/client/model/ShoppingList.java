@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import client.Session;
+import client.states.AddProductState;
 import client.utils.TablePrinter;
 import com.google.gson.*;
+import crdts.AddWins;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -20,18 +22,24 @@ import java.util.concurrent.Future;
 public class ShoppingList {
     private String id;
     private String name;
-    private Map<String, ProductQuantity> products;
+
+    //String is the name of the product, Product is the product itself
+    private Map<String, Product> products;
+
+    private AddWins addWins;
 
     public ShoppingList(String name) {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.products = new HashMap<>();
+        this.addWins = new AddWins(id);
     }
 
     public ShoppingList(String id, String name) {
         this.id = id;
         this.name = name;
         this.products = new HashMap<>();
+        this.addWins = new AddWins(id);
     }
 
 //    public ShoppingList(String id, String name, Map<String, ProductQuantity> products) {
@@ -48,22 +56,27 @@ public class ShoppingList {
         return this.name;
     }
 
-    public Map<String, ProductQuantity> getProducts() {
+    public Map<String, Product> getProducts() {
         return products;
     }
 
     public void addProduct(String name, int quantity) {
         if (products.containsKey(name)) {
             addProductQuantity(name, quantity);
-        } else {
+        }
+        else {
             ProductQuantity quantities = new ProductQuantity(quantity, 0);
-            products.put(name, quantities);
+            Product p = new Product(name, quantities);
+            products.put(p.getName(), p);
+            addWins.add(p.getName());
         }
     }
+
     public void addProductQuantity(String name, int quantity) {
         if(productExists(name)) {
-            ProductQuantity currQuantities = products.get(name);
+            ProductQuantity currQuantities = products.get(name).getProductQuantity();
             currQuantities.addToList(quantity);
+            products.get(name).setProductQuantity(currQuantities);
         }
         else{
             System.out.println("Invalid product.");
@@ -76,8 +89,9 @@ public class ShoppingList {
 
     public void buyProductQuantity(String name, int quantity) {
         if(productExists(name)) {
-            ProductQuantity currQuantities = products.get(name);
+            ProductQuantity currQuantities = products.get(name).getProductQuantity();
             currQuantities.buyQuantity(quantity);
+            products.get(name).setProductQuantity(currQuantities);
         }
         else{
             System.out.println("Invalid product.");
@@ -88,9 +102,9 @@ public class ShoppingList {
         List<List<String>> data = new ArrayList<>();
         data.add(List.of("Product Name", "Quantity", "Quantity Bought"));
 
-        for (Map.Entry<String, ProductQuantity> product : products.entrySet()) {
+        for (Map.Entry<String, Product> product : products.entrySet()) {
             String productName = product.getKey();
-            ProductQuantity quantities = product.getValue();
+            ProductQuantity quantities = product.getValue().getProductQuantity();
             data.add(List.of(productName, Integer.toString(quantities.getQuantity()), Integer.toString(quantities.getQuantityBought())));
         }
 
@@ -117,7 +131,8 @@ public class ShoppingList {
                 directory.mkdirs();
             }
 
-            AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
 
             ByteBuffer buffer = ByteBuffer.wrap(json.getBytes());
 
@@ -141,6 +156,7 @@ public class ShoppingList {
 
     public void deleteProduct(String name){
         this.products.remove(name);
+        addWins.rm(name);
     }
 
     public static ShoppingList loadFromFile(String fileName) {

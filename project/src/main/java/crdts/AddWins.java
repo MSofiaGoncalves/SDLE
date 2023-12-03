@@ -3,16 +3,16 @@ package crdts;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import server.utils.Triple;
-import server.utils.Tuple;
+import crdts.utils.Triple;
+import crdts.utils.Tuple;
 
 public class AddWins {
-    private NodeId id;
-    private HashSet<Tuple<NodeId, Long>> cc;
-    private HashSet<Triple<NodeId, String, Long>> set;
+    private String id;
+    private HashSet<Tuple<String, Long>> cc;
+    private HashSet<Triple<String, String, Long>> set;
     private long local_counter;
 
-    public AddWins(NodeId id) {
+    public AddWins(String id) {
         this.id = id;
         this.cc = new HashSet<>();
         this.set = new HashSet<>();
@@ -22,7 +22,7 @@ public class AddWins {
 
     public HashSet<String> elements() {
         HashSet<String> elements = new HashSet<>();
-        for (Triple<NodeId, String, Long> triple : this.set) {
+        for (Triple<String, String, Long> triple : this.set) {
             elements.add(triple.getSecond());
         }
         return elements;
@@ -35,25 +35,28 @@ public class AddWins {
     }
 
     public void rm(String element) {
-        Iterator<Triple<NodeId, String, Long>> iterator = this.set.iterator();
+
+        Iterator<Triple<String, String, Long>> iterator = this.set.iterator();
         while (iterator.hasNext()) {
-            Triple<NodeId, String, Long> triple = iterator.next();
+            Triple<String, String, Long> triple = iterator.next();
             if (triple.getSecond().equals(element)) {
                 iterator.remove();
             }
         }
+
+        System.out.println(this);
     }
 
     public void join(AddWins other) {
-        HashSet<Triple<NodeId, String, Long>> newSet = new HashSet<>();
+        HashSet<Triple<String, String, Long>> newSet = new HashSet<>();
 
-        for (Triple<NodeId, String, Long> v : this.set) {
+        for (Triple<String, String, Long> v : this.set) {
             if (other.set.contains(v) || !other.cc.contains(new Tuple<>(v.getFirst(), v.getThird()))) {
                 newSet.add(v);
             }
         }
 
-        for (Triple<NodeId, String, Long> entry : other.set) {
+        for (Triple<String, String, Long> entry : other.set) {
             if (!this.cc.contains(new Tuple<>(entry.getFirst(), entry.getThird()))) {
                 newSet.add(entry);
             }
