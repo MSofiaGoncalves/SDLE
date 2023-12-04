@@ -1,9 +1,16 @@
 package client;
 
 import client.model.ShoppingList;
+import com.google.gson.Gson;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.Future;
 
 /**
  * Singleton class that holds the current session.
@@ -24,6 +31,10 @@ public class Session {
             connector = new ServerConnector();
         }
         return connector;
+    }
+
+    public void addShoppingList(ShoppingList shoppingList){
+        this.lists.put(shoppingList.getId(), shoppingList);
     }
 
     /**
@@ -95,6 +106,21 @@ public class Session {
         }
         username = name;
         lists = loadListsFromFiles();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(this);
+        System.out.println("Json: " + json);
+        String directoryPath = "src/main/java/client/lists/" + username + "/";
+        System.out.println("Directory created!: " + directoryPath);
+        try {
+            File directory = new File(directoryPath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error saving to file asynchronously: " + e.getMessage());
+        }
     }
 
     public static synchronized Session getSession() {

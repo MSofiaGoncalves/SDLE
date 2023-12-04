@@ -56,34 +56,91 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
         return shoppingList;
     }
 
+    /**
+     * Decode the products field of a BSON document into a Map of products.
+     * @param reader the BSON reader
+     * @return the Map of products
+     */
     private Map<String, Product> decodeProducts(BsonReader reader) {
-        Map<String, Product> products = new HashMap<>();
+        Map<String, Product> productMap = new HashMap<>();
+
         reader.readStartArray();
-
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            reader.readStartDocument();
-            String productName = reader.readString();
-
+            String productName = null;
             int quantity = 0;
             int quantityBought = 0;
 
             reader.readStartDocument();
+
             while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-                String field = reader.readName();
-                if (field.equals("quantity")) {
-                    quantity = reader.readInt32();
-                } else if (field.equals("quantityBought")) {
-                    quantityBought = reader.readInt32();
+                String fieldName = reader.readName();
+
+                if (fieldName.equals("name")) {
+                    productName = reader.readString();
+                } else if (fieldName.equals("pncounter")) {
+                    reader.readStartDocument();
+
+                    while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                        String counterType = reader.readName();
+
+                        if (counterType.equals("id")) {
+                            reader.readString();
+                        } else if (counterType.equals("inc")) {
+                            quantity = readCounterValue(reader);
+                        } else if (counterType.equals("dec")) {
+                            reader.readStartDocument();
+                            reader.readEndDocument();
+                        } else {
+                            reader.skipValue();
+                        }
+                    }
+
+                    reader.readEndDocument();
+                } else {
+                    reader.skipValue();
                 }
             }
-            reader.readEndDocument();
 
             reader.readEndDocument();
-            Product p = new Product(productName, quantity, quantityBought);
-            products.put(productName, p);
+
+            if (productName != null) {
+                Product product = new Product(productName, quantity, quantityBought);
+                productMap.put(productName, product);
+            }
         }
+
         reader.readEndArray();
-        return products;
+
+        return productMap;
+    }
+
+    private int readCounterValue(BsonReader reader) {
+        int value = 0;
+
+        reader.readStartDocument();
+        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+            String fieldName = reader.readName();
+
+            if (fieldName.equals("counters")) {
+                reader.readStartDocument();
+
+                while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                    // Assuming the counter name is the same as the product name
+                    if (reader.readName().equals(fieldName)) {
+                        value = reader.readInt32();
+                    } else {
+                        reader.skipValue();
+                    }
+                }
+
+                reader.readEndDocument();
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.readEndDocument();
+
+        return value;
     }
 
     private AddWins decodeAddWins(BsonReader reader) {
@@ -259,7 +316,7 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
         writer.writeName("dec");
         encodesGCounter(writer, pncounter.getDec());
 
-        writer.writeEndDocument(); // End of the PNCounter document
+        writer.writeEndDocument();
     }
 
 

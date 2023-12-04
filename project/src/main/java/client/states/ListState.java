@@ -3,6 +3,7 @@ package client.states;
 import client.Session;
 import client.model.ShoppingList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +26,25 @@ public class ListState implements State {
             String listId = in.nextLine();
             this.shoppingList = Session.getSession().getList(listId);
             if (this.shoppingList == null) { // non existent
+                System.out.println("List does not exist.");
                 return new HubState();
+            }
+            String directoryPath = "src/main/java/client/lists/" + Session.getSession().getUsername();
+            String fileName = listId + ".json"; // Replace this with the file name you want to check
+
+            File directory = new File(directoryPath);
+            System.out.println("Directory: " + directory.getAbsolutePath());
+            if (directory.exists() && directory.isDirectory()) {
+                File file = new File(directory, fileName);
+
+                if (file.exists()) {
+                    System.out.println("File exists: " + file.getAbsolutePath());
+                } else {
+                    shoppingList.saveToFile();
+                    Session.getSession().addShoppingList(shoppingList);
+                }
+            } else {
+                System.out.println("Directory does not exist.");
             }
         }
 

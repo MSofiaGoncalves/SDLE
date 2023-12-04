@@ -34,7 +34,7 @@ public class ShoppingList {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.products = new HashMap<>();
-        this.addWins = new AddWins(id);
+        this.addWins = new AddWins(Session.getSession().getUsername());
         save();
 
     }
@@ -43,7 +43,7 @@ public class ShoppingList {
         this.id = id;
         this.name = name;
         this.products = new HashMap<>();
-        this.addWins = new AddWins(id);
+        this.addWins = new AddWins(Session.getSession().getUsername());
         saveToFile();
     }
 
@@ -160,7 +160,7 @@ public class ShoppingList {
         }
     }
 
-    private void saveToFile() {
+    public void saveToFile() {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
