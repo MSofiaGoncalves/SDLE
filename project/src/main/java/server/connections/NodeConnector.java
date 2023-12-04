@@ -8,6 +8,9 @@ import server.db.Database;
 import server.model.Message;
 import server.model.ShoppingList;
 
+import java.time.Instant;
+import java.util.Date;
+
 /**
  * Handles outgoing connections to other nodes.
  */
@@ -42,6 +45,7 @@ public class NodeConnector {
         message.setQuorumId(quorumId);
         message.setList(list);
         sendMessage(message);
+        setWaitingReply();
     }
 
     /**
@@ -66,6 +70,7 @@ public class NodeConnector {
         message.setRedirectId(redirectId);
         message.setList(list);
         sendMessage(message);
+        setWaitingReply();
     }
 
     /**
@@ -92,6 +97,7 @@ public class NodeConnector {
         message.setQuorumId(quorumId);
         message.setListId(id);
         sendMessage(message);
+        setWaitingReply();
     }
 
     /**
@@ -118,6 +124,7 @@ public class NodeConnector {
         message.setRedirectId(redirectId);
         message.setListId(id);
         sendMessage(message);
+        setWaitingReply();
     }
 
     /**
@@ -144,10 +151,21 @@ public class NodeConnector {
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
     }
 
+    /**
+     * Send a message to the node's socket.
+     * @param message The message to send.
+     */
     private void sendMessage(Message message) {
         message.setAuthorAddress(Store.getProperty("nodehost"));
         String request = new Gson().toJson(message);
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
-        //Store.getInstance().getWaitingReply().put(message.getId(), socket);
+    }
+
+    /**
+     * Set the node as waiting for a reply. <br>
+     * This is used to detect failure detection on that node.
+     */
+    private void setWaitingReply() {
+        Store.getInstance().getWaitingReply().put(address, Instant.now());
     }
 }

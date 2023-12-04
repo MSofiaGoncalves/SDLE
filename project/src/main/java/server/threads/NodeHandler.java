@@ -80,6 +80,7 @@ public class NodeHandler implements Runnable {
      * Update quorum status on the store.
      */
     private Void writeAck(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         Store.getLogger().info("Received write ack: " + message.getQuorumId());
         QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
@@ -109,6 +110,7 @@ public class NodeHandler implements Runnable {
      * Sends a reply to the client.
      */
     private Void redirectWriteReply(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         ZMQ.Socket socket =  store.getClientBroker();
 
@@ -139,6 +141,7 @@ public class NodeHandler implements Runnable {
      * Update quorum status on the store.
      */
     private Void readAck(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         Store.getLogger().info("Received read ack: " + message.getQuorumId());
         QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
@@ -169,6 +172,7 @@ public class NodeHandler implements Runnable {
      * Sends a reply to the client.
      */
     private Void redirectReadReply(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         ZMQ.Socket socket =  store.getClientBroker();
 
@@ -188,5 +192,9 @@ public class NodeHandler implements Runnable {
         Store.getLogger().info("Received status update from node: " + message.getStatusNodeId());
         Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeId(), message.getStatusValue());
         return null;
+    }
+
+    private void processResponse() {
+        Store.getInstance().getWaitingReply().remove(message.getAuthorAddress());
     }
 }

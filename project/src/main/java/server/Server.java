@@ -2,7 +2,12 @@ package server;
 
 import org.zeromq.ZMQ;
 import server.threads.ClientHandler;
+import server.threads.FailureDetector;
 import server.threads.NodeHandler;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 
@@ -19,6 +24,8 @@ public class Server {
         for (ZMQ.Socket node: store.getNodes().values()) {
             poller.register(node, ZMQ.Poller.POLLIN);
         }
+
+        startFailureDetector();
 
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll();
@@ -77,5 +84,11 @@ public class Server {
             Store.logger.warning("Quorum number is less than quorum reads. Setting quorum number to quorum reads.");
             store.setProperty("quorumNumber", store.getProperty("quorumReads"));
         }
+    }
+
+    private static void startFailureDetector() {
+        FailureDetector failureDetector = new FailureDetector();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(failureDetector, 0, Integer.parseInt(Store.getProperty("failureTimeout")), TimeUnit.MILLISECONDS);
     }
 }
