@@ -60,6 +60,7 @@ public class QuorumStatus {
 
     public void addList(ShoppingList list) {
         // TODO: merge lists (crdts)
+        // this.list.merge(list)
         this.list = list;
     }
 

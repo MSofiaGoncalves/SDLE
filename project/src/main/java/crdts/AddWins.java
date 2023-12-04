@@ -12,6 +12,13 @@ public class AddWins {
     private HashSet<Triple<String, String, Long>> set;
     private long local_counter;
 
+    public AddWins() {
+        this.id = null;
+        this.cc = new HashSet<>();
+        this.set = new HashSet<>();
+        this.local_counter = 1;
+    }
+
     public AddWins(String id) {
         this.id = id;
         this.cc = new HashSet<>();
@@ -19,6 +26,37 @@ public class AddWins {
         this.local_counter = 1;
     }
 
+    public String getId(){
+        return id;
+    }
+
+    public HashSet<Tuple<String, Long>> getCc(){
+        return cc;
+    }
+
+    public HashSet<Triple<String, String, Long>> getSet(){
+        return set;
+    }
+
+    public long getLocalCounter(){
+        return local_counter;
+    }
+
+    public String setId(String id){
+        return this.id = id;
+    }
+
+    public HashSet<Tuple<String, Long>> setCc(HashSet<Tuple<String, Long>> cc){
+        return this.cc = cc;
+    }
+
+    public HashSet<Triple<String, String, Long>> setSet(HashSet<Triple<String, String, Long>> set){
+        return this.set = set;
+    }
+
+    public long setLocalCounter(long local_counter){
+        return this.local_counter = local_counter;
+    }
 
     public HashSet<String> elements() {
         HashSet<String> elements = new HashSet<>();

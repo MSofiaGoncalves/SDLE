@@ -146,6 +146,7 @@ public class ShoppingList {
 
     public void deleteProduct(String name){
         this.products.remove(name);
+        this.addWins.rm(name);
         save();
     }
 

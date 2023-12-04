@@ -10,6 +10,16 @@ public class Tuple<X, Y> {
         this.y = y;
     }
 
+    public X getFirst()
+    {
+        return x;
+    }
+
+    public Y getSecond()
+    {
+        return y;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

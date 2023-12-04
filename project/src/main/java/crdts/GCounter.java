@@ -12,6 +12,14 @@ public class GCounter {
         this.counters = new HashMap<>();
     }
 
+    public String getId(){
+        return id;
+    }
+
+    public Map<String, Integer> getCounters(){
+        return counters;
+    }
+
     public void increment(Integer value) {
         counters.put(id, counters.getOrDefault(id, 0) + value);
     }

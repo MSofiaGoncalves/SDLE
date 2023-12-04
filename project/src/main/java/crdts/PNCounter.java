@@ -12,6 +12,24 @@ public class PNCounter {
         this.dec = new GCounter(id);
     }
 
+    public String getId(){
+        return id;
+    }
+
+
+
+    public GCounter getInc(){
+        return inc;
+    }
+
+
+
+    public GCounter getDec(){
+        return dec;
+    }
+
+
+
     public void increment(Integer value) {
         inc.increment(value);
     }
