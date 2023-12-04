@@ -11,8 +11,8 @@ public class QuorumStatus {
     private final int quorumSize;
     private int currentSize;
     private final String id;
-    private final ZMQ.Socket nodeSocket; // for redirect
     private final byte[] identity; // for client responses
+    private final String redirectAddress;
     private final String redirectId;
     private ShoppingList list; // used for reads
 
@@ -20,19 +20,19 @@ public class QuorumStatus {
      * Creates a new QuorumStatus. <br>
      * Either {identity} or {nodeSocket, redirectId} must be set, for client and redirect replies, respectively.
      * @param quorumSize Number of nodes needed for completion.
-     * @param nodeSocket The socket of the node to redirect to.
+     * @param redirectAddress The url of the node to redirect to.
      * @param identity The identity of the client to reply to.
      * @param redirectId The id of the redirection, to be used in the reply.
      */
-    public QuorumStatus(int quorumSize, ZMQ.Socket nodeSocket, byte[] identity, String redirectId) {
+    public QuorumStatus(int quorumSize, String redirectAddress, byte[] identity, String redirectId) {
         this.quorumSize = quorumSize;
         this.currentSize = 0;
         this.id = java.util.UUID.randomUUID().toString();
-        if ((nodeSocket == null && redirectId == null) && identity == null) {
+        if ((redirectAddress == null && redirectId == null) && identity == null) {
             throw new IllegalArgumentException("Either nodeSocket or identity must be set.");
         }
-        this.nodeSocket = nodeSocket;
         this.identity = identity;
+        this.redirectAddress = redirectAddress;
         this.redirectId = redirectId;
     }
 
@@ -73,8 +73,8 @@ public class QuorumStatus {
     }
 
     private void finishWrite() {
-        if (this.nodeSocket != null) {
-            new NodeConnector(this.nodeSocket).sendRedirectWriteReply(this.redirectId);
+        if (this.redirectAddress != null) {
+            new NodeConnector(this.redirectAddress).sendRedirectWriteReply(this.redirectId);
         } else {
             ZMQ.Socket socket =  Store.getInstance().getClientBroker();
 
@@ -85,8 +85,8 @@ public class QuorumStatus {
     }
 
     private void finishRead() {
-        if (this.nodeSocket != null) {
-            new NodeConnector(this.nodeSocket).sendRedirectReadReply(this.list, this.redirectId);
+        if (this.redirectAddress != null) {
+            new NodeConnector(this.redirectAddress).sendRedirectReadReply(this.list, this.redirectId);
         } else {
             ZMQ.Socket socket =  Store.getInstance().getClientBroker();
 

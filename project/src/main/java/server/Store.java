@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -31,6 +32,7 @@ public class Store {
     private HashRing hashRing;
     private ConcurrentHashMap<String, QuorumStatus> quorums;
     private ConcurrentHashMap<String, byte[]> ongoingRedirects;
+    private ConcurrentHashMap<String, Date> waitingReply; // used for failure detection
 
     public static Logger logger;
 
@@ -132,6 +134,10 @@ public class Store {
 
     public ConcurrentHashMap<String, byte[]> getOngoingRedirects() {
         return ongoingRedirects;
+    }
+
+    public ConcurrentHashMap<String, Date> getWaitingReply() {
+        return waitingReply;
     }
 
     public static String getProperty(String key) {

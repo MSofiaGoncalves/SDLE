@@ -53,6 +53,8 @@ public class NodeHandler implements Runnable {
         functionMap.put("redirectRead", this::redirectRead);
         functionMap.put("redirectReadReply", this::redirectReadReply);
 
+        functionMap.put("statusUpdate", this::statusUpdate);
+
         if (message == null || message.getMethod() == null) {
             return;
         }
@@ -69,7 +71,7 @@ public class NodeHandler implements Runnable {
     private Void writeList(Void unused) {
         Store.getLogger().info("Writing list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
-        new NodeConnector(socket).sendListWriteAck(message.getQuorumId());
+        new NodeConnector(message.getAuthorAddress()).sendListWriteAck(message.getQuorumId());
         return null;
     }
 
@@ -96,7 +98,7 @@ public class NodeHandler implements Runnable {
     private Void redirectWrite(Void unused) {
         Store.getLogger().info("Received list write redirect: " + message.getList().getId());
         QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
-        quorum.setNodeSocket(socket);
+        quorum.setNodeAddress(message.getAuthorAddress());
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -128,7 +130,7 @@ public class NodeHandler implements Runnable {
     private Void readList(Void unused) {
         Store.getLogger().info("Reading list, " + message.getListId() + " from database.");
         ShoppingList list = Database.getInstance().readList(message.getListId());
-        new NodeConnector(socket).sendListReadAck(list, message.getQuorumId());
+        new NodeConnector(message.getAuthorAddress()).sendListReadAck(list, message.getQuorumId());
         return null;
     }
 
@@ -156,7 +158,7 @@ public class NodeHandler implements Runnable {
     private Void redirectRead(Void unused) {
         Store.getLogger().info("Received list read redirect: " + message.getListId());
         QuorumHandler quorum = new QuorumHandler(message.getListId(), QuorumMode.READ);
-        quorum.setNodeSocket(socket);
+        quorum.setNodeAddress(message.getAuthorAddress());
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -177,6 +179,14 @@ public class NodeHandler implements Runnable {
         socket.send(clientIdentity, ZMQ.SNDMORE);
         socket.send("".getBytes(), ZMQ.SNDMORE);
         socket.send(listJSON, 0);
+        return null;
+    }
+
+    /*************** Status ****************/
+
+    private Void statusUpdate(Void unused) {
+        Store.getLogger().info("Received status update from node: " + message.getStatusNodeId());
+        Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeId(), message.getStatusValue());
         return null;
     }
 }

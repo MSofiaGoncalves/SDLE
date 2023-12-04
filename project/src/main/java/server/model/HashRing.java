@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Defines a consistent hashing ring. <br>
@@ -18,6 +19,7 @@ public class HashRing {
     private final int virtualNodesNumber;
     private final int size;
     private final int replicas;
+    private final ConcurrentHashMap<String, Boolean> nodeStatus;
 
     /**
      * Creates a new HashRing.
@@ -30,6 +32,7 @@ public class HashRing {
         this.virtualNodesNumber = virtualNodesNumber;
         this.size = size;
         this.replicas = replicas;
+        this.nodeStatus = new ConcurrentHashMap<>();
         ring = new TreeMap<>();
     }
 
@@ -47,18 +50,6 @@ public class HashRing {
     }
 
     /**
-     * Adds a node to the ring. <br>
-     * Node's name is hashed once per virtual replica and added to the ring.
-     *
-     * @param node Node's uri
-     */
-    public void addNode(String node) {
-        for (int i = 0; i < virtualNodesNumber; i++) {
-            ring.put(getHash(node + "-" + i), node);
-        }
-    }
-
-    /**
      * Adds multiple nodes to the ring.
      *
      * @param nodes The nodes to add.
@@ -70,15 +61,23 @@ public class HashRing {
     }
 
     /**
-     * Removes a node from the ring.
+     * Adds a node to the ring. <br>
+     * Node's name is hashed once per virtual replica and added to the ring.
      *
-     * @param node The node to remove.
+     * @param node Node's uri
      */
-    public void removeNode(String node) {
+    public void addNode(String node) {
         for (int i = 0; i < virtualNodesNumber; i++) {
-            ring.remove(getHash(node + "-" + i));
+            ring.put(getHash(node + "-" + i), node);
+            nodeStatus.put(node, true);
         }
     }
+
+    public void updateNodeStatus(String node, boolean status) {
+        nodeStatus.put(node, status);
+        // TODO: update ring
+    }
+
 
     /**
      * Get all the physical nodes that hold a key
@@ -95,7 +94,9 @@ public class HashRing {
             }
         }
         Set<String> nodes = new HashSet<>();
-        nodes.add(ring.get(hash));
+        if (nodeStatus.get(ring.get(hash))) {
+            nodes.add(ring.get(hash));
+        }
         Long initialHash = hash;
         while (nodes.size() < replicas) {
             hash = ring.higherKey(hash);
@@ -107,7 +108,7 @@ public class HashRing {
                         + " replicas of key " + key + " but only "
                         + nodes.size() + " nodes are available.");
             }
-            if (!nodes.contains(ring.get(hash))) {
+            if (!nodes.contains(ring.get(hash)) && nodeStatus.get(ring.get(hash))) {
                 nodes.add(ring.get(hash));
             }
         }

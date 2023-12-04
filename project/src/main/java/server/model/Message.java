@@ -12,12 +12,19 @@ import com.google.gson.Gson;
  * <strong>list</strong> - The list to insert (optional) <br>
  */
 public class Message {
+    private String authorAddress;
     private String method;
     private String listId;
     private ShoppingList list;
     private String address; // use to identify clients
     private String quorumId;
     private String redirectId;
+
+    // status update
+    private String statusNodeId;
+    private Boolean statusValue;
+
+    public Message() {}
 
     public Message(String message) {
         new Gson().fromJson(message, Message.class);
@@ -50,5 +57,45 @@ public class Message {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getStatusNodeId() {
+        return statusNodeId;
+    }
+
+    public Boolean getStatusValue() {
+        return statusValue;
+    }
+
+    public String getAuthorAddress() {
+        return authorAddress;
+    }
+
+    public void setAuthorAddress(String authorAddress) {
+        this.authorAddress = authorAddress;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public void setList(ShoppingList list) {
+        this.list = list;
+    }
+
+    public void setQuorumId(String quorumId) {
+        this.quorumId = quorumId;
+    }
+
+    public void setListId(String listId) {
+        this.listId = listId;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setRedirectId(String redirectId) {
+        this.redirectId = redirectId;
     }
 }
