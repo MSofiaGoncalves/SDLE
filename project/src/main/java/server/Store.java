@@ -198,9 +198,7 @@ public class Store {
      */
     private void connectNodes() {
         for (String nodeUrl : getProperty("nodes").split(";")) {
-            // Skip self
-            String[] temp = nodeUrl.split(":");
-            if (temp[temp.length - 1].equals(getProperty("nodePort"))) {
+            if (nodeUrl.equals(getProperty("nodehost"))) {
                 continue;
             }
 

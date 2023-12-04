@@ -189,8 +189,8 @@ public class NodeHandler implements Runnable {
     /*************** Status ****************/
 
     private Void statusUpdate(Void unused) {
-        Store.getLogger().info("Received status update from node: " + message.getStatusNodeId());
-        Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeId(), message.getStatusValue());
+        Store.getLogger().info("Received status update from node: " + message.getStatusNodeAddress());
+        //Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeAddress(), message.getStatusValue());
         return null;
     }
 

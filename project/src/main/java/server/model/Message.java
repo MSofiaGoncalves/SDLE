@@ -21,7 +21,7 @@ public class Message {
     private String redirectId;
 
     // status update
-    private String statusNodeId;
+    private String statusNodeAddress;
     private Boolean statusValue;
 
     public Message() {}
@@ -59,8 +59,8 @@ public class Message {
         return address;
     }
 
-    public String getStatusNodeId() {
-        return statusNodeId;
+    public String getStatusNodeAddress() {
+        return statusNodeAddress;
     }
 
     public Boolean getStatusValue() {
@@ -93,6 +93,14 @@ public class Message {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public void setStatusNodeAddress(String statusNodeAddress) {
+        this.statusNodeAddress = statusNodeAddress;
+    }
+
+    public void setStatusValue(Boolean statusValue) {
+        this.statusValue = statusValue;
     }
 
     public void setRedirectId(String redirectId) {

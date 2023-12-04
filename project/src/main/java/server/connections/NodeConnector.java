@@ -1,15 +1,12 @@
 package server.connections;
 
 import com.google.gson.Gson;
-import org.w3c.dom.Node;
 import org.zeromq.ZMQ;
 import server.Store;
-import server.db.Database;
 import server.model.Message;
 import server.model.ShoppingList;
 
 import java.time.Instant;
-import java.util.Date;
 
 /**
  * Handles outgoing connections to other nodes.
@@ -141,14 +138,15 @@ public class NodeConnector {
 
     /**
      * Send a status update to another node.
-     * @param id The id of the node to update.
+     * @param address The address of the node to update.
      * @param status Current status of the node. True if online, false otherwise.
      */
-    public void sendStatusUpdate(String id, boolean status) {
-        String request = String.format(
-                "{\"method\":\"statusUpdate\", \"id\": \"%s\", \"status\":%s}",
-                id, status);
-        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+    public void sendStatusUpdate(String address, boolean status) {
+        Message message = new Message();
+        message.setMethod("statusUpdate");
+        message.setStatusNodeAddress(address);
+        message.setStatusValue(status);
+        sendMessage(message);
     }
 
     /**
