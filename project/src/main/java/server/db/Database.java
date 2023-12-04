@@ -14,6 +14,8 @@ import ch.qos.logback.classic.Level;
 import server.Store;
 import server.model.ShoppingList;
 
+import java.util.List;
+
 /**
  * Database class
  * <p>
@@ -40,7 +42,7 @@ public class Database {
      * Private constructor. Starts the MongoDB connection.
      */
     private Database() {
-        String uri = Store.getInstance().getProperty("dbHost");
+        String uri = Store.getProperty("dbHost");
         try {
             // Disable MongoDB logging
             ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
@@ -50,7 +52,7 @@ public class Database {
                     MongoClientSettings.getDefaultCodecRegistry()
             );
             mongoClient = MongoClients.create(uri);
-            database = mongoClient.getDatabase("db" + Store.getInstance().getProperty("id"));
+            database = mongoClient.getDatabase("db" + Store.getProperty("id"));
 
             Document indexKeys = new Document("id", 1);
             IndexOptions indexOptions = new IndexOptions().unique(true);

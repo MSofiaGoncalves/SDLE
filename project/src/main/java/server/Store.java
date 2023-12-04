@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -27,9 +26,12 @@ public class Store {
     private static Store instance = null;
     private ZContext context;
     private ZMQ.Socket clientBroker;
+    private ZMQ.Socket nodeBroker;
+    private List<String> nodes;
+
     private java.util.concurrent.ExecutorService threadPool;
     private static Properties properties;
-    private ConcurrentHashMap<String, ZMQ.Socket> nodes;
+
     private HashRing hashRing;
     private ConcurrentHashMap<String, QuorumStatus> quorums;
     private ConcurrentHashMap<String, byte[]> ongoingRedirects;
@@ -38,7 +40,6 @@ public class Store {
     public static Logger logger;
 
     private Store() {
-        nodes = new ConcurrentHashMap<>();
         quorums = new ConcurrentHashMap<>();
         ongoingRedirects = new ConcurrentHashMap<>();
         waitingReply = new ConcurrentHashMap<>();
@@ -62,11 +63,12 @@ public class Store {
             // Create client broker
             clientBroker = context.createSocket(ZMQ.ROUTER);
             clientBroker.bind(getProperty("clienthost"));
-            logger.info("Listening for clients at " + getProperty("clienthost") + ".");
-            logger.info("Listening for nodes at " + getProperty("nodehost") + ".");
 
             // Connect to all nodes
             connectNodes();
+
+            logger.info("Listening for clients at " + getProperty("clienthost") + ".");
+            logger.info("Listening for nodes at " + getProperty("nodehost") + ".");
 
             hashRing = new HashRing(getProperty("nodes").split(";"),
                     Integer.parseInt(getProperty("virtualNodes")),
@@ -87,6 +89,11 @@ public class Store {
         return instance;
     }
 
+    public void sendNodeMessage(String nodeAddress, String message) {
+        nodeBroker.sendMore(nodeAddress.getBytes(ZMQ.CHARSET));
+        nodeBroker.send(message);
+    }
+
     public HashRing getHashRing() {
         return hashRing;
     }
@@ -102,8 +109,11 @@ public class Store {
         return clientBroker;
     }
 
-    public ConcurrentHashMap<String, ZMQ.Socket> getNodes() {
-        return nodes;
+    public ZMQ.Socket getNodeBroker() {
+        if (nodeBroker == null) {
+            getInstance();
+        }
+        return nodeBroker;
     }
 
     public ZContext getContext() {
@@ -128,6 +138,10 @@ public class Store {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getNodes() {
+        return nodes;
     }
 
     public ConcurrentHashMap<String, QuorumStatus> getQuorums() {
@@ -194,18 +208,19 @@ public class Store {
     /**
      * Connects to all nodes specified in the properties file. <br>
      * <p>
-     * Inter-node communication is done using DEALER-DEALER sockets.
+     * Inter-node communication is done using ROUTER-ROUTER sockets.
      */
     private void connectNodes() {
-        for (String nodeUrl : getProperty("nodes").split(";")) {
+        nodes = List.of(getProperty("nodes").split(";"));
+        nodeBroker = context.createSocket(ZMQ.ROUTER);
+        nodeBroker.bind(getProperty("nodehost"));
+        nodeBroker.setIdentity(getProperty("nodehost").getBytes(ZMQ.CHARSET));
+        for (String nodeUrl : nodes) {
             if (nodeUrl.equals(getProperty("nodehost"))) {
                 continue;
             }
 
-            ZMQ.Socket socket = getContext().createSocket(ZMQ.DEALER);
-            socket.bind(getProperty("nodehost"));
-            socket.connect(nodeUrl);
-            nodes.put(nodeUrl, socket);
+            nodeBroker.connect(nodeUrl);
         }
     }
 }

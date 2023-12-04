@@ -13,7 +13,6 @@ import java.time.Instant;
  */
 public class NodeConnector {
     private String address;
-    private ZMQ.Socket socket;
 
     /**
      * Creates a new NodeConnector.
@@ -22,11 +21,6 @@ public class NodeConnector {
      */
     public NodeConnector(String address) {
         this.address = address;
-
-        socket = Store.getInstance().getNodes().get(address);
-        if (socket == null) {
-            Store.getLogger().severe("Could not find socket for node: " + address);
-        }
     }
 
     /*************** Write ****************/
@@ -154,9 +148,8 @@ public class NodeConnector {
      * @param message The message to send.
      */
     private void sendMessage(Message message) {
-        message.setAuthorAddress(Store.getProperty("nodehost"));
         String request = new Gson().toJson(message);
-        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        Store.getInstance().sendNodeMessage(address, request);
     }
 
     /**

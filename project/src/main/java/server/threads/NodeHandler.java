@@ -18,16 +18,16 @@ import java.util.function.Function;
  * Handles messages from the nodes.
  */
 public class NodeHandler implements Runnable {
-    private ZMQ.Socket socket;
+    private String address;
     private String messageRaw;
     private Message message;
 
     /**
      * Creates a new NodeHandler.
-     * @param socket The socket to send replies to.
+     * @param address The address of the node that sent the message.
      * @param message The message to handle.
      */
-    public NodeHandler(ZMQ.Socket socket, String message) {
+    public NodeHandler(String address, String message) {
         this.messageRaw = message;
         try {
             this.message = new Gson().fromJson(messageRaw, Message.class);
@@ -37,7 +37,7 @@ public class NodeHandler implements Runnable {
             return;
         }
 
-        this.socket = socket;
+        this.address = address;
     }
 
     @Override
@@ -59,6 +59,11 @@ public class NodeHandler implements Runnable {
             return;
         }
 
+        if (functionMap.get(message.getMethod()) == null) {
+            Store.getLogger().warning("Received invalid message: " + messageRaw);
+            return;
+        }
+
         functionMap.get(message.getMethod()).apply(null);
     }
 
@@ -71,7 +76,7 @@ public class NodeHandler implements Runnable {
     private Void writeList(Void unused) {
         Store.getLogger().info("Writing list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
-        new NodeConnector(message.getAuthorAddress()).sendListWriteAck(message.getQuorumId());
+        new NodeConnector(address).sendListWriteAck(message.getQuorumId());
         return null;
     }
 
@@ -99,7 +104,7 @@ public class NodeHandler implements Runnable {
     private Void redirectWrite(Void unused) {
         Store.getLogger().info("Received list write redirect: " + message.getList().getId());
         QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
-        quorum.setNodeAddress(message.getAuthorAddress());
+        quorum.setNodeAddress(address);
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -132,7 +137,7 @@ public class NodeHandler implements Runnable {
     private Void readList(Void unused) {
         Store.getLogger().info("Reading list, " + message.getListId() + " from database.");
         ShoppingList list = Database.getInstance().readList(message.getListId());
-        new NodeConnector(message.getAuthorAddress()).sendListReadAck(list, message.getQuorumId());
+        new NodeConnector(address).sendListReadAck(list, message.getQuorumId());
         return null;
     }
 
@@ -161,7 +166,7 @@ public class NodeHandler implements Runnable {
     private Void redirectRead(Void unused) {
         Store.getLogger().info("Received list read redirect: " + message.getListId());
         QuorumHandler quorum = new QuorumHandler(message.getListId(), QuorumMode.READ);
-        quorum.setNodeAddress(message.getAuthorAddress());
+        quorum.setNodeAddress(address);
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -195,6 +200,6 @@ public class NodeHandler implements Runnable {
     }
 
     private void processResponse() {
-        Store.getInstance().getWaitingReply().remove(message.getAuthorAddress());
+        Store.getInstance().getWaitingReply().remove(address);
     }
 }

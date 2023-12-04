@@ -18,12 +18,11 @@ public class Server {
         store.initConnections();
         checkParams();
         ZMQ.Socket clientBroker = store.getClientBroker();
+        ZMQ.Socket nodeBroker = store.getNodeBroker();
 
         ZMQ.Poller poller = store.getContext().createPoller(1);
         poller.register(clientBroker, ZMQ.Poller.POLLIN);
-        for (ZMQ.Socket node: store.getNodes().values()) {
-            poller.register(node, ZMQ.Poller.POLLIN);
-        }
+        poller.register(nodeBroker, ZMQ.Poller.POLLIN);
 
         startFailureDetector();
 
@@ -40,15 +39,12 @@ public class Server {
 
                 ClientHandler clientHandler = new ClientHandler(clientIdentity, request);
                 store.execute(clientHandler);
-            } else { // Node message
-                for (int i = 1; i < poller.getSize(); i++) {
-                    if (poller.pollin(i)) {
-                        ZMQ.Socket node = poller.getSocket(i);
-                        byte[] msg = node.recv();
-                        NodeHandler nodeHandler = new NodeHandler(node, new String(msg, ZMQ.CHARSET));
-                        store.execute(nodeHandler);
-                    }
-                }
+            }
+            if (poller.pollin(1)) { // Node message
+                byte[] identity = nodeBroker.recv();
+                byte[] msg = nodeBroker.recv();
+                NodeHandler nodeHandler = new NodeHandler(new String(identity, ZMQ.CHARSET), new String(msg, ZMQ.CHARSET));
+                store.execute(nodeHandler);
             }
         }
     }

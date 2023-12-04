@@ -5,6 +5,7 @@ import server.Store;
 import server.connections.NodeConnector;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,9 +34,9 @@ public class FailureDetector implements Runnable {
      */
     private void broadcastFailure(String address) {
         Store store = Store.getInstance();
-        ConcurrentHashMap<String, ZMQ.Socket> nodes = store.getNodes();
+        List<String> nodes = store.getNodes();
 
-        for (String node : nodes.keySet()) {
+        for (String node : nodes) {
             if (!node.equals(address) && !node.equals(Store.getProperty("nodehost"))) {
                 new NodeConnector(node).sendStatusUpdate(address, false);
             }

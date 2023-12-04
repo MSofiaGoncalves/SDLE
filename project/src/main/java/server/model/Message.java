@@ -12,7 +12,6 @@ import com.google.gson.Gson;
  * <strong>list</strong> - The list to insert (optional) <br>
  */
 public class Message {
-    private String authorAddress;
     private String method;
     private String listId;
     private ShoppingList list;
@@ -65,14 +64,6 @@ public class Message {
 
     public Boolean getStatusValue() {
         return statusValue;
-    }
-
-    public String getAuthorAddress() {
-        return authorAddress;
-    }
-
-    public void setAuthorAddress(String authorAddress) {
-        this.authorAddress = authorAddress;
     }
 
     public void setMethod(String method) {
