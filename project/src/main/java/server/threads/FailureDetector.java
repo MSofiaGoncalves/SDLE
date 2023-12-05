@@ -41,5 +41,6 @@ public class FailureDetector implements Runnable {
                 new NodeConnector(node).sendStatusUpdate(address, false);
             }
         }
+        store.getHashRing().updateNodeStatus(address, false);
     }
 }

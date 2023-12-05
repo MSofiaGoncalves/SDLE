@@ -2,6 +2,8 @@ package server.model;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 /**
  * Represents a message sent from the client to the server.
  *
@@ -15,7 +17,8 @@ public class Message {
     private String method;
     private String listId;
     private ShoppingList list;
-    private String address; // use to identify clients
+    private List<ShoppingList> lists;
+    private String address;
     private String quorumId;
     private String redirectId;
 
@@ -96,5 +99,13 @@ public class Message {
 
     public void setRedirectId(String redirectId) {
         this.redirectId = redirectId;
+    }
+
+    public List<ShoppingList> getLists() {
+        return lists;
+    }
+
+    public void setLists(List<ShoppingList> lists) {
+        this.lists = lists;
     }
 }

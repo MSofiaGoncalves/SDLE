@@ -98,6 +98,14 @@ public class Database {
         return documents.first();
     }
 
+    public List<ShoppingList> readAllLists() {
+        MongoCollection<ShoppingList> collection = getCollection();
+
+        FindIterable<ShoppingList> documents = collection.find();
+
+        return documents.into(new java.util.ArrayList<>());
+    }
+
     /**
      * Get the collection of lists initiated with the correct codec.
      *

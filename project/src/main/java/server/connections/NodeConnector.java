@@ -7,6 +7,7 @@ import server.model.Message;
 import server.model.ShoppingList;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Handles outgoing connections to other nodes.
@@ -140,6 +141,14 @@ public class NodeConnector {
         message.setMethod("statusUpdate");
         message.setStatusNodeAddress(address);
         message.setStatusValue(status);
+        sendMessage(message);
+    }
+
+    public void sendHintedHandoff(String address, List<ShoppingList> lists) {
+        Message message = new Message();
+        message.setMethod("hintedHandoff");
+        message.setAddress(address);
+        message.setLists(lists);
         sendMessage(message);
     }
 

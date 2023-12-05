@@ -54,6 +54,7 @@ public class NodeHandler implements Runnable {
         functionMap.put("redirectReadReply", this::redirectReadReply);
 
         functionMap.put("statusUpdate", this::statusUpdate);
+        functionMap.put("hintedHandoff", this::hintedHandoff);
 
         if (message == null || message.getMethod() == null) {
             return;
@@ -194,8 +195,16 @@ public class NodeHandler implements Runnable {
     /*************** Status ****************/
 
     private Void statusUpdate(Void unused) {
-        Store.getLogger().info("Received status update from node: " + message.getStatusNodeAddress());
-        //Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeAddress(), message.getStatusValue());
+        Store.getLogger().info("Received status update about node: " + message.getStatusNodeAddress());
+        Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeAddress(), message.getStatusValue());
+        return null;
+    }
+
+    private Void hintedHandoff(Void unused) {
+        Store.getLogger().info("Received hinted handoff from node: " + message.getAddress());
+        for (ShoppingList list : message.getLists()) {
+            Database.getInstance().insertList(list);
+        }
         return null;
     }
 

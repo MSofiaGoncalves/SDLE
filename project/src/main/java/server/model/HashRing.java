@@ -1,11 +1,13 @@
 package server.model;
 
+import server.Store;
+import server.connections.NodeConnector;
+import server.db.Database;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,8 +20,9 @@ public class HashRing {
     private final TreeMap<Long, String> ring;
     private final int virtualNodesNumber;
     private final int size;
-    private final int replicas;
+    private int replicas;
     private final ConcurrentHashMap<String, Boolean> nodeStatus;
+    private final ConcurrentHashMap<String, Long> hashCache;
 
     /**
      * Creates a new HashRing.
@@ -33,6 +36,7 @@ public class HashRing {
         this.size = size;
         this.replicas = replicas;
         this.nodeStatus = new ConcurrentHashMap<>();
+        this.hashCache = new ConcurrentHashMap<>();
         ring = new TreeMap<>();
     }
 
@@ -74,8 +78,12 @@ public class HashRing {
     }
 
     public void updateNodeStatus(String node, boolean status) {
+        if (status) {
+            // TODO: recovery
+        } else {
+            relocateLists(node);
+        }
         nodeStatus.put(node, status);
-        // TODO: update ring
     }
 
 
@@ -86,6 +94,10 @@ public class HashRing {
      * @return The nodes that hold the key.
      */
     public Set<String> getNodes(String key) {
+        return new HashSet<>(getNodes(key, replicas));
+    }
+
+    private List<String> getNodes(String key, int replicas) {
         Long hash = getHash(key);
         if (!ring.containsKey(hash)) {
             hash = ring.floorKey(hash);
@@ -93,7 +105,7 @@ public class HashRing {
                 hash = ring.lastKey();
             }
         }
-        Set<String> nodes = new HashSet<>();
+        List<String> nodes = new ArrayList<>();
         if (nodeStatus.get(ring.get(hash))) {
             nodes.add(ring.get(hash));
         }
@@ -104,9 +116,10 @@ public class HashRing {
                 hash = ring.firstKey();
             }
             if (hash.equals(initialHash)) {
-                throw new RuntimeException("Error: Trying to store " + replicas
+                Store.getLogger().warning("Error: Trying to store " + replicas
                         + " replicas of key " + key + " but only "
                         + nodes.size() + " nodes are available.");
+                return List.of();
             }
             if (!nodes.contains(ring.get(hash)) && nodeStatus.get(ring.get(hash))) {
                 nodes.add(ring.get(hash));
@@ -124,6 +137,9 @@ public class HashRing {
      * @return The hash of the node.
      */
     private long getHash(String node) {
+        if (hashCache.containsKey(node)) {
+            return hashCache.get(node);
+        }
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(node.getBytes());
@@ -133,6 +149,7 @@ public class HashRing {
             BigInteger result = bigInt.mod(BigInteger.valueOf(size));
 
             // result to hex string
+            hashCache.put(node, result.longValue());
             return result.longValue();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -140,9 +157,25 @@ public class HashRing {
         return -1;
     }
 
-    public void printRing() {
-        for (Long key : ring.keySet()) {
-            System.out.println(key + " " + ring.get(key));
+    private void relocateLists(String node) {
+        Map<String, List<ShoppingList>> toSend = new HashMap<>();
+        List<ShoppingList> lists = Database.getInstance().readAllLists();
+        for (ShoppingList list : lists) {
+            List<String> nodes = getNodes(list.getId(), replicas);
+            if (nodes.contains(node)) {
+                List<String> nextNodes = getNodes(list.getId(), replicas + 1);
+                if (nextNodes.isEmpty()) {
+                    Store.getLogger().warning("Error: No nodes available to relocate list " + list.getId());
+                    continue;
+                }
+                String nextNode = nextNodes.get(nextNodes.size() - 1);
+                toSend.computeIfAbsent(nextNode, k -> new ArrayList<>());
+                toSend.get(nextNode).add(list);
+            }
+        }
+
+        for (String url : toSend.keySet()) {
+            new NodeConnector(url).sendHintedHandoff(node, toSend.get(url));
         }
     }
 }
