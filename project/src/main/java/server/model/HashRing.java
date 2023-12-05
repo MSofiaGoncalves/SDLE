@@ -82,6 +82,13 @@ public class HashRing {
         }
     }
 
+    /**
+     * Update the status of a node. <br>
+     * If a node goes down, it will relocate its lists to the next node.
+     * If a node goes up, it will return the lists that were relocated to it.
+     * @param node The node to update.
+     * @param status The new status of the node. True if online, false otherwise.
+     */
     public void updateNodeStatus(String node, boolean status) {
         if (nodeStatus.get(node) == status) return;
         if (status) {
@@ -97,6 +104,11 @@ public class HashRing {
         return nodeStatus.get(node);
     }
 
+    /**
+     * Store a list of lists that were relocated to this node.
+     * @param node The original owner of the lists.
+     * @param lists The lists to store.
+     */
     public void addHintedLists(String node, List<ShoppingList> lists) {
         for (ShoppingList list : lists) {
             hintedLists.computeIfAbsent(node, k -> new ArrayList<>());
@@ -174,6 +186,11 @@ public class HashRing {
         return -1;
     }
 
+    /**
+     * Relocate all lists that were stored in a node that went down. <br>
+     * Sends each list to the next physical node in the ring, if possible.
+     * @param node The node that went down.
+     */
     private void relocateLists(String node) {
         Map<String, List<ShoppingList>> toSend = new HashMap<>();
         List<ShoppingList> lists = Database.getInstance().readAllLists();
@@ -196,6 +213,10 @@ public class HashRing {
         }
     }
 
+    /**
+     * Return all hinted lists to an owner.
+     * @param node The node that came back online.
+     */
     private void returnLists(String node) {
         List<String> hintedIds = hintedLists.get(node);
         List<ShoppingList> toSend = new ArrayList<>();

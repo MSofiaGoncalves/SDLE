@@ -197,14 +197,22 @@ public class NodeHandler implements Runnable {
 
     /*************** Status ****************/
 
+    /**
+     * Receive a status update about a node. <br>
+     * Updates the status of the node on the hash ring.
+     */
     private Void statusUpdate(Void unused) {
         Store.getLogger().info("Received status update about node: " + message.getStatusNodeAddress());
         Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeAddress(), message.getStatusValue());
         return null;
     }
 
+    /**
+     * Process a hinted handoff list transfer. <br>
+     * List ids will be tagged in the hash ring to be return when the node comes back online.
+     */
     private Void hintedHandoff(Void unused) {
-        Store.getLogger().info("Received hinted handoff from node: " + message.getAddress());
+        Store.getLogger().info("Received hinted handoff of node: " + message.getAddress());
         Store.getInstance().getHashRing().addHintedLists(message.getAddress(), message.getLists());
         for (ShoppingList list : message.getLists()) {
             Database.getInstance().insertList(list);
@@ -212,6 +220,9 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Receive hinted lists from another node.
+     */
     private Void returnHinted(Void unused) {
         Store.getLogger().info("Received hinted return from node: " + address + " (" + message.getLists().size() + " lists)");
         for (ShoppingList list : message.getLists()) {
@@ -220,6 +231,10 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Receive a heartbeat from another node. <br>
+     * Sends a reply and updates the status of the node on the hash ring.
+     */
     private Void heartbeat(Void unused) {
         Store.getLogger().info("Received heartbeat request from " + address);
         new NodeConnector(address).sendHeartbeatReply();
@@ -227,12 +242,19 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /**
+     * Receive a heartbeat reply from another node. <br>
+     * Updates the status of the node on the hash ring.
+     */
     private Void heartbeatReply(Void unused) {
         Store.getLogger().info("Received heartbeat from " + address);
         Store.getInstance().getHashRing().updateNodeStatus(address, true);
         return null;
     }
 
+    /**
+     * Remove the node from the waiting list.
+     */
     private void processResponse() {
         Store.getInstance().getWaitingReply().remove(address);
     }

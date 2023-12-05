@@ -6,6 +6,7 @@ import server.threads.ClientHandler;
 import server.threads.FailureDetector;
 import server.threads.NodeHandler;
 
+import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -90,20 +91,22 @@ public class Server {
         scheduler.scheduleAtFixedRate(failureDetector, 0, Integer.parseInt(Store.getProperty("failureTimeout")), TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * When starting, the node will try to connect to all other nodes during 10 seconds.
+     */
     private static void sendHeartbeats() {
         Thread thread = new Thread(() -> {
+            Instant start = Instant.now();
             try {
-                Thread.sleep(1000);
-                for (String node : Store.getInstance().getNodes()) {
-                    new NodeConnector(node).sendHeartbeat();
+                while (Instant.now().isBefore(start.plusMillis(10000))) {
+                    Thread.sleep(1000);
+                    for (String node : Store.getInstance().getNodes()) {
+                        if (node.equals(Store.getProperty("nodehost"))) continue;
+                        if (Store.getInstance().getHashRing().getNodeStatus(node)) continue;
+                        Store.getInstance().getNodeBroker().connect(node);
+                        new NodeConnector(node).sendHeartbeat();
+                    }
                 }
-                Thread.sleep(1000);
-                boolean b = false;
-                for (String node: Store.getInstance().getNodes()) {
-                    b = b || Store.getInstance().getHashRing().getNodeStatus(node);
-                }
-                if (b) System.out.println("All nodes are up.");
-                else System.out.println("Some nodes are down.");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

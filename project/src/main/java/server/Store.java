@@ -215,6 +215,7 @@ public class Store {
         nodeBroker = context.createSocket(ZMQ.ROUTER);
         nodeBroker.bind(getProperty("nodehost"));
         nodeBroker.setIdentity(getProperty("nodehost").getBytes(ZMQ.CHARSET));
+        nodeBroker.setRouterHandover(true);
         for (String nodeUrl : nodes) {
             if (nodeUrl.equals(getProperty("nodehost"))) {
                 continue;
