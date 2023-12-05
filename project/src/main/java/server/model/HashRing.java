@@ -23,6 +23,7 @@ public class HashRing {
     private int replicas;
     private final ConcurrentHashMap<String, Boolean> nodeStatus;
     private final ConcurrentHashMap<String, Long> hashCache;
+    private final ConcurrentHashMap<String, List<String>> hintedLists;
 
     /**
      * Creates a new HashRing.
@@ -37,6 +38,7 @@ public class HashRing {
         this.replicas = replicas;
         this.nodeStatus = new ConcurrentHashMap<>();
         this.hashCache = new ConcurrentHashMap<>();
+        this.hintedLists = new ConcurrentHashMap<>();
         ring = new TreeMap<>();
     }
 
@@ -73,19 +75,34 @@ public class HashRing {
     public void addNode(String node) {
         for (int i = 0; i < virtualNodesNumber; i++) {
             ring.put(getHash(node + "-" + i), node);
-            nodeStatus.put(node, true);
+            nodeStatus.put(node, false); // assume all nodes are down
+            if (node.equals(Store.getProperty("nodehost"))) {
+                nodeStatus.put(node, true);
+            }
         }
     }
 
     public void updateNodeStatus(String node, boolean status) {
+        if (nodeStatus.get(node) == status) return;
         if (status) {
-            // TODO: recovery
+            returnLists(node);
         } else {
+            new NodeConnector(node).sendHeartbeat();
             relocateLists(node);
         }
         nodeStatus.put(node, status);
     }
 
+    public Boolean getNodeStatus(String node) {
+        return nodeStatus.get(node);
+    }
+
+    public void addHintedLists(String node, List<ShoppingList> lists) {
+        for (ShoppingList list : lists) {
+            hintedLists.computeIfAbsent(node, k -> new ArrayList<>());
+            hintedLists.get(node).add(list.getId());
+        }
+    }
 
     /**
      * Get all the physical nodes that hold a key
@@ -177,5 +194,18 @@ public class HashRing {
         for (String url : toSend.keySet()) {
             new NodeConnector(url).sendHintedHandoff(node, toSend.get(url));
         }
+    }
+
+    private void returnLists(String node) {
+        List<String> hintedIds = hintedLists.get(node);
+        List<ShoppingList> toSend = new ArrayList<>();
+        if (hintedIds == null) return;
+        for (String id : hintedIds) {
+            ShoppingList list = Database.getInstance().readList(id);
+            if (list != null) {
+                toSend.add(list);
+            }
+        }
+        new NodeConnector(node).sendReturnHinted(toSend);
     }
 }

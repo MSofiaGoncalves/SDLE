@@ -24,6 +24,7 @@ public class NodeHandler implements Runnable {
 
     /**
      * Creates a new NodeHandler.
+     *
      * @param address The address of the node that sent the message.
      * @param message The message to handle.
      */
@@ -31,8 +32,7 @@ public class NodeHandler implements Runnable {
         this.messageRaw = message;
         try {
             this.message = new Gson().fromJson(messageRaw, Message.class);
-        }
-        catch (JsonSyntaxException e) { // message meant for other thread, ignore
+        } catch (JsonSyntaxException e) { // message meant for other thread, ignore
             Store.getLogger().warning("Received invalid message: " + messageRaw);
             return;
         }
@@ -55,6 +55,9 @@ public class NodeHandler implements Runnable {
 
         functionMap.put("statusUpdate", this::statusUpdate);
         functionMap.put("hintedHandoff", this::hintedHandoff);
+        functionMap.put("returnHinted", this::returnHinted);
+        functionMap.put("heartbeat", this::heartbeat);
+        functionMap.put("heartbeatReply", this::heartbeatReply);
 
         if (message == null || message.getMethod() == null) {
             return;
@@ -118,7 +121,7 @@ public class NodeHandler implements Runnable {
     private Void redirectWriteReply(Void unused) {
         processResponse();
         Store store = Store.getInstance();
-        ZMQ.Socket socket =  store.getClientBroker();
+        ZMQ.Socket socket = store.getClientBroker();
 
         byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
         store.getOngoingRedirects().remove(message.getRedirectId());
@@ -180,7 +183,7 @@ public class NodeHandler implements Runnable {
     private Void redirectReadReply(Void unused) {
         processResponse();
         Store store = Store.getInstance();
-        ZMQ.Socket socket =  store.getClientBroker();
+        ZMQ.Socket socket = store.getClientBroker();
 
         byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
         store.getOngoingRedirects().remove(message.getRedirectId());
@@ -202,9 +205,31 @@ public class NodeHandler implements Runnable {
 
     private Void hintedHandoff(Void unused) {
         Store.getLogger().info("Received hinted handoff from node: " + message.getAddress());
+        Store.getInstance().getHashRing().addHintedLists(message.getAddress(), message.getLists());
         for (ShoppingList list : message.getLists()) {
             Database.getInstance().insertList(list);
         }
+        return null;
+    }
+
+    private Void returnHinted(Void unused) {
+        Store.getLogger().info("Received hinted return from node: " + address + " (" + message.getLists().size() + " lists)");
+        for (ShoppingList list : message.getLists()) {
+            Database.getInstance().insertList(list);
+        }
+        return null;
+    }
+
+    private Void heartbeat(Void unused) {
+        Store.getLogger().info("Received heartbeat request from " + address);
+        new NodeConnector(address).sendHeartbeatReply();
+        Store.getInstance().getHashRing().updateNodeStatus(address, true);
+        return null;
+    }
+
+    private Void heartbeatReply(Void unused) {
+        Store.getLogger().info("Received heartbeat from " + address);
+        Store.getInstance().getHashRing().updateNodeStatus(address, true);
         return null;
     }
 

@@ -1,6 +1,7 @@
 package server;
 
 import org.zeromq.ZMQ;
+import server.connections.NodeConnector;
 import server.threads.ClientHandler;
 import server.threads.FailureDetector;
 import server.threads.NodeHandler;
@@ -25,6 +26,7 @@ public class Server {
         poller.register(nodeBroker, ZMQ.Poller.POLLIN);
 
         startFailureDetector();
+        sendHeartbeats();
 
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll();
@@ -86,5 +88,26 @@ public class Server {
         FailureDetector failureDetector = new FailureDetector();
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(failureDetector, 0, Integer.parseInt(Store.getProperty("failureTimeout")), TimeUnit.MILLISECONDS);
+    }
+
+    private static void sendHeartbeats() {
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                for (String node : Store.getInstance().getNodes()) {
+                    new NodeConnector(node).sendHeartbeat();
+                }
+                Thread.sleep(1000);
+                boolean b = false;
+                for (String node: Store.getInstance().getNodes()) {
+                    b = b || Store.getInstance().getHashRing().getNodeStatus(node);
+                }
+                if (b) System.out.println("All nodes are up.");
+                else System.out.println("Some nodes are down.");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
     }
 }

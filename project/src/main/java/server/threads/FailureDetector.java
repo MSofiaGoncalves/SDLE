@@ -1,6 +1,5 @@
 package server.threads;
 
-import org.zeromq.ZMQ;
 import server.Store;
 import server.connections.NodeConnector;
 
@@ -21,6 +20,7 @@ public class FailureDetector implements Runnable {
         for (String address : waitingReply.keySet()) {
             Instant lastReply = waitingReply.get(address);
             if (lastReply.plusMillis(Integer.parseInt(Store.getProperty("failureTimeout"))).isBefore(Instant.now())) {
+                if (!store.getHashRing().getNodeStatus(address)) continue;
                 Store.getLogger().warning("Node " + address + " is down.");
                 waitingReply.remove(address);
                 broadcastFailure(address);

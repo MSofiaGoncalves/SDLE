@@ -1,7 +1,6 @@
 package server.connections;
 
 import com.google.gson.Gson;
-import org.zeromq.ZMQ;
 import server.Store;
 import server.model.Message;
 import server.model.ShoppingList;
@@ -62,7 +61,7 @@ public class NodeConnector {
         message.setRedirectId(redirectId);
         message.setList(list);
         sendMessage(message);
-        setWaitingReply();
+        //setWaitingReply();
     }
 
     /**
@@ -116,7 +115,7 @@ public class NodeConnector {
         message.setRedirectId(redirectId);
         message.setListId(id);
         sendMessage(message);
-        setWaitingReply();
+        //setWaitingReply();
     }
 
     /**
@@ -130,6 +129,8 @@ public class NodeConnector {
         message.setList(list);
         sendMessage(message);
     }
+
+    /*************** Status ****************/
 
     /**
      * Send a status update to another node.
@@ -149,6 +150,25 @@ public class NodeConnector {
         message.setMethod("hintedHandoff");
         message.setAddress(address);
         message.setLists(lists);
+        sendMessage(message);
+    }
+
+    public void sendReturnHinted(List<ShoppingList> lists) {
+        Message message = new Message();
+        message.setMethod("returnHinted");
+        message.setLists(lists);
+        sendMessage(message);
+    }
+
+    public void sendHeartbeat() {
+        Message message = new Message();
+        message.setMethod("heartbeat");
+        sendMessage(message);
+    }
+
+    public void sendHeartbeatReply() {
+        Message message = new Message();
+        message.setMethod("heartbeatReply");
         sendMessage(message);
     }
 
