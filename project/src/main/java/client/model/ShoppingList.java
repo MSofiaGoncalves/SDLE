@@ -34,7 +34,7 @@ public class ShoppingList {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.products = new HashMap<>();
-        this.addWins = new AddWins(Session.getSession().getUsername());
+        this.addWins = new AddWins(this.id);
         save();
 
     }
@@ -43,7 +43,7 @@ public class ShoppingList {
         this.id = id;
         this.name = name;
         this.products = new HashMap<>();
-        this.addWins = new AddWins(Session.getSession().getUsername());
+        this.addWins = new AddWins(this.id);
         saveToFile();
     }
 
@@ -192,6 +192,14 @@ public class ShoppingList {
         } catch (Exception e) {
             System.out.println("Error saving to file asynchronously: " + e.getMessage());
         }
+    }
+
+    public AddWins getAddWins() {
+        return addWins;
+    }
+
+    public void mergeListsClient(ShoppingList list){
+        this.addWins.join(list.getAddWins());
     }
 
 

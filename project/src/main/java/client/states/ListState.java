@@ -20,7 +20,7 @@ public class ListState implements State {
     }
 
     public State step() {
-        if (shoppingList == null) {
+        if (shoppingList == null) { //When the option to open a list by ID is used
             System.out.print("List id: ");
             Scanner in = new Scanner(System.in);
             String listId = in.nextLine();
@@ -30,7 +30,7 @@ public class ListState implements State {
                 return new HubState();
             }
             String directoryPath = "src/main/java/client/lists/" + Session.getSession().getUsername();
-            String fileName = listId + ".json"; // Replace this with the file name you want to check
+            String fileName = listId + ".json";
 
             File directory = new File(directoryPath);
             System.out.println("Directory: " + directory.getAbsolutePath());

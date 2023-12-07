@@ -63,11 +63,16 @@ public class ShoppingList {
     }
 
     public void mergeLists(ShoppingList list){
+        System.out.println("Merging lists");
+        System.out.println("This: " + this.products);
+        System.out.println("List: " + list.getProducts());
+        System.out.println("AddWins do this:" + addWins.toString());
+        System.out.println("AddWins do list:" + list.getAddWins().toString());
         this.addWins.join(list.getAddWins());
-        for (Map.Entry<String, Product> entry : products.entrySet()) {
-            entry.getValue().mergeProducts(entry.getValue());
-
-        }
+        System.out.println("Lista dos produtos depois do join: " + this.products);
+        System.out.println("AddWins do this depois do join:" + addWins.toString());
 
     }
+
+
 }

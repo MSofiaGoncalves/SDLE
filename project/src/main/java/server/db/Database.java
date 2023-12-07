@@ -75,6 +75,15 @@ public class Database {
         } catch (com.mongodb.MongoWriteException e) {
             if (e.getCode() == 11000) {
                 Bson filter = Filters.eq("id", list.getId());
+                //Não é fazer replace, é fazer o merge
+
+                //ir buscar list com função
+                FindIterable<ShoppingList> listRead = collection.find(filter);
+                //fazer merge com a list que é passada como parâmetro
+                System.out.println("ListRead: " + listRead.first().getProducts());
+                System.out.println("List: " + list.getProducts());
+                list.mergeLists(listRead.first());
+                //fazer replace
                 collection.replaceOne(filter, list);
             }
         }

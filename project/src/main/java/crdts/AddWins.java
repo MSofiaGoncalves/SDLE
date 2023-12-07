@@ -3,6 +3,7 @@ package crdts;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import client.Session;
 import crdts.utils.Triple;
 import crdts.utils.Tuple;
 
@@ -58,6 +59,32 @@ public class AddWins {
         return this.local_counter = local_counter;
     }
 
+    public void showSet(){
+        for(Triple<String, String, Long> triple : this.set){
+            System.out.println(triple.getFirst() + " " + triple.getSecond() + " " + triple.getThird());
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (Triple<String, String, Long> triple : this.set) {
+            result.append(triple.getFirst())
+                    .append(" ")
+                    .append(triple.getSecond())
+                    .append(" ")
+                    .append(triple.getThird())
+                    .append("\n");
+        }
+        return result.toString();
+    }
+
+    public void showCc(){
+        for(Tuple<String, Long> tuple : this.cc){
+            System.out.println(tuple.getFirst() + " " + tuple.getSecond());
+        }
+    }
+
     public HashSet<String> elements() {
         HashSet<String> elements = new HashSet<>();
         for (Triple<String, String, Long> triple : this.set) {
@@ -67,8 +94,8 @@ public class AddWins {
     }
 
     public void add(String element) {
-        this.cc.add(new Tuple<>(this.id, this.local_counter));
-        this.set.add(new Triple<>(this.id, element, this.local_counter));
+        this.cc.add(new Tuple<>(Session.getSession().getUsername(), this.local_counter));
+        this.set.add(new Triple<>(Session.getSession().getUsername(), element, this.local_counter));
         this.local_counter += 1;
     }
 
