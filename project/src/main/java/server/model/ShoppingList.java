@@ -91,12 +91,17 @@ public class ShoppingList {
             }
         }
 
-
+        for (Map.Entry<String, Product> product : products.entrySet()) {
+            System.out.println("Product no merge de quantidades:" + product);
+            if(this.getProducts().containsKey(product.getKey())){
+                System.out.println("Key:" + product.getKey());
+                //System.out.println("list.getProducts().get(product.getKey()): " + list.getProducts().get(product.getKey()).getPncounter().toString());
+                product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
+                //System.out.println("Product depois do merge:" + list.getProducts().get(product.getKey().getPnCounter().toString());
+            }
+        }
 
         System.out.println("Lista dos produtos depois do join: " + this.products);
         System.out.println("AddWins do this depois do join:" + addWins.toString());
-
     }
-
-
 }

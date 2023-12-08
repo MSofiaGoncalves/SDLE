@@ -198,6 +198,17 @@ public class ShoppingList {
         return addWins;
     }
 
+    //@Override
+    /*public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ShoppingList{id='").append(id).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", products=").append(products);
+        sb.append(", addWins=").append(addWins);
+        sb.append('}');
+        return sb.toString();
+    }*/
+
     public void mergeListsClient(ShoppingList list){
         this.addWins.join(list.getAddWins());
         System.out.println("Lista dos produtos antes do join NO CLIENT: " + this.products);
@@ -223,11 +234,19 @@ public class ShoppingList {
         // fazer loop por this.products
         // dar merge de cada um com os counters dos products da list correspondentes
 
+        for (Map.Entry<String, Product> product : products.entrySet()) {
+            System.out.println("Product no merge de quantidades:" + product);
+            if(list.getProducts().containsKey(product.getKey())){
+                System.out.println("Key:" + product.getKey());
+                //System.out.println("list.getProducts().get(product.getKey()): " + list.getProducts().get(product.getKey()).getPncounter().toString());
+                product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
+                //System.out.println("Product depois do merge:" + list.getProducts().get(product.getKey().getPnCounter().toString());
+            }
+        }
+
         System.out.println("Lista dos produtos depois do join NO CLIENT: " + this.products);
         System.out.println("AddWins do this depois do join NO CLIENT:" + addWins.toString());
     }
-
-
 
     /**
      * Saves the list to the server and local storage. <br>

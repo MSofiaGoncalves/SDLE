@@ -63,9 +63,10 @@ public class Product {
         return this.gCounter.value();
     }
 
-    public void mergeProducts(Product product){
-        this.gCounter.merge(product.getGCounter());
+
+    public void mergeProduct(Product product){
         this.pnCounter.merge(product.getPnCounter());
+        this.gCounter.merge(product.getGCounter());
     }
 
     /*

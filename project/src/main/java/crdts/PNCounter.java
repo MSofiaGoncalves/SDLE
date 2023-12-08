@@ -12,6 +12,16 @@ public class PNCounter {
         this.dec = new GCounter(id);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PNCounter{id='").append(id).append('\'');
+        sb.append(", inc=").append(inc);
+        sb.append(", dec=").append(dec);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getId(){
         return id;
     }

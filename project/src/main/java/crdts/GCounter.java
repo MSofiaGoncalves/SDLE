@@ -12,6 +12,15 @@ public class GCounter {
         this.counters = new HashMap<>();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("GCounter{id='").append(id).append('\'');
+        sb.append(", counters=").append(counters);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getId(){
         return id;
     }

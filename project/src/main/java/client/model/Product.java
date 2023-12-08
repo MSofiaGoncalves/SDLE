@@ -15,6 +15,16 @@ public class Product {
         this.gCounter = new GCounter(name);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Product{name='").append(name).append('\'');
+        sb.append(", pnCounter=").append(pnCounter);
+        sb.append(", gCounter=").append(gCounter);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getName() {
         return name;
     }
@@ -45,6 +55,19 @@ public class Product {
 
     public int getQuantityBought(){
         return this.gCounter.value();
+    }
+
+    public void mergeProduct(Product product){
+        this.pnCounter.merge(product.getPncounter());
+        this.gCounter.merge(product.getGCounter());
+    }
+
+    public GCounter getGCounter() {
+        return this.gCounter;
+    }
+
+    public PNCounter getPncounter() {
+        return this.pnCounter;
     }
 
     /*
