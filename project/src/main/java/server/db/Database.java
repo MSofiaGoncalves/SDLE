@@ -83,6 +83,7 @@ public class Database {
                 System.out.println("ListRead: " + listRead.first().getProducts());
                 System.out.println("List: " + list.getProducts());
                 list.mergeLists(listRead.first());
+                System.out.println("List depois do merge no insertList: " + list.getProducts());
                 //fazer replace
                 collection.replaceOne(filter, list);
             }

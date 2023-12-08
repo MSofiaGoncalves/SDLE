@@ -1,5 +1,6 @@
 package server.model;
 
+import crdts.utils.Triple;
 import server.model.Product;
 import crdts.AddWins;
 import org.bson.codecs.pojo.annotations.BsonId;
@@ -62,6 +63,11 @@ public class ShoppingList {
         this.addWins = addWins;
     }
 
+    public void deleteProduct(String name){
+        this.products.remove(name);
+        this.addWins.rm(name);
+    }
+
     public void mergeLists(ShoppingList list){
         System.out.println("Merging lists");
         System.out.println("This: " + this.products);
@@ -69,6 +75,24 @@ public class ShoppingList {
         System.out.println("AddWins do this:" + addWins.toString());
         System.out.println("AddWins do list:" + list.getAddWins().toString());
         this.addWins.join(list.getAddWins());
+        System.out.println("AddWins do this depois do join NO SERVER:" + addWins.toString());
+        for(String key : this.products.keySet()){
+            if(!this.addWins.containsProduct(key)) {
+                System.out.println("A remover produto: " + key);
+                this.deleteProduct(key);
+            }
+        }
+        // iterar pelo set e inserir se nao estiver no this
+        for(Triple<String, String, Long> triple : list.getAddWins().getSet()){
+            if(!this.products.containsKey(triple.getSecond())){
+                System.out.println("A inserir produto: " + triple.getSecond());
+                Product p = new Product(triple.getSecond(), 0);
+                this.products.put(p.getName(), p);
+            }
+        }
+
+
+
         System.out.println("Lista dos produtos depois do join: " + this.products);
         System.out.println("AddWins do this depois do join:" + addWins.toString());
 

@@ -15,6 +15,7 @@ import client.utils.TablePrinter;
 import com.google.gson.*;
 import crdts.AddWins;
 import crdts.PNCounter;
+import crdts.utils.Triple;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -71,7 +72,7 @@ public class ShoppingList {
         else {
             Product p = new Product(name, quantity);
             products.put(p.getName(), p);
-            addWins.add(p.getName());
+            addWins.add(p.getName(), Session.getSession().getUsername());
         }
         save();
     }
@@ -200,6 +201,25 @@ public class ShoppingList {
 
     public void mergeListsClient(ShoppingList list){
         this.addWins.join(list.getAddWins());
+        System.out.println("Lista dos produtos antes do join NO CLIENT: " + this.products);
+        System.out.println(this.products.keySet());
+        for(String key : this.products.keySet()){
+            System.out.println("Key: " + key);
+            if(!this.addWins.containsProduct(key)) {
+                System.out.println("A remover produto: " + key);
+                this.deleteProduct(key);
+            }
+        }
+        for(Triple<String, String, Long> triple : this.addWins.getSet()){
+            if(!this.products.containsKey(triple.getSecond())){
+                Product p = new Product(triple.getSecond(), 0);
+                this.products.put(p.getName(), p);
+            }
+            // se existir na lista mas nao estiver no set tirar la lista
+        }
+
+        System.out.println("Lista dos produtos depois do join NO CLIENT: " + this.products);
+        System.out.println("AddWins do this depois do join NO CLIENT:" + addWins.toString());
     }
 
 
@@ -210,6 +230,8 @@ public class ShoppingList {
      */
     private void save() {
         Session.getConnector().writeList(this);
+        System.out.println("save");
+        System.out.println(this.getProducts());
         saveToFile();
     }
 

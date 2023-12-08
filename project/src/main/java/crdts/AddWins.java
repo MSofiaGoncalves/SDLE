@@ -3,7 +3,6 @@ package crdts;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import client.Session;
 import crdts.utils.Triple;
 import crdts.utils.Tuple;
 
@@ -65,6 +64,15 @@ public class AddWins {
         }
     }
 
+    public Boolean containsProduct(String p){
+        for(Triple<String, String, Long> triple : this.set){
+            if(triple.getSecond().equals(p)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -93,9 +101,9 @@ public class AddWins {
         return elements;
     }
 
-    public void add(String element) {
-        this.cc.add(new Tuple<>(Session.getSession().getUsername(), this.local_counter));
-        this.set.add(new Triple<>(Session.getSession().getUsername(), element, this.local_counter));
+    public void add(String element, String username) {
+        this.cc.add(new Tuple<>(username, this.local_counter));
+        this.set.add(new Triple<>(username, element, this.local_counter));
         this.local_counter += 1;
     }
 
