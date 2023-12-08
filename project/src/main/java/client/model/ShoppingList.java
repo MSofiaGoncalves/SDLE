@@ -3,10 +3,7 @@ package client.model;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import client.ServerConnector;
 import client.Session;
@@ -172,7 +169,9 @@ public class ShoppingList {
 
         try {
             Path path = Paths.get(fileName);
+            System.out.println("path: " + path);
             File directory = path.getParent().toFile();
+            System.out.println("directory: " + directory);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
@@ -203,7 +202,8 @@ public class ShoppingList {
         this.addWins.join(list.getAddWins());
         System.out.println("Lista dos produtos antes do join NO CLIENT: " + this.products);
         System.out.println(this.products.keySet());
-        for(String key : this.products.keySet()){
+        Set<String> keySet = this.products.keySet();
+        for(String key : keySet){
             System.out.println("Key: " + key);
             if(!this.addWins.containsProduct(key)) {
                 System.out.println("A remover produto: " + key);
@@ -215,8 +215,12 @@ public class ShoppingList {
                 Product p = new Product(triple.getSecond(), 0);
                 this.products.put(p.getName(), p);
             }
-            // se existir na lista mas nao estiver no set tirar la lista
         }
+
+        // pn counter:
+        // agora sabemos que os produtos no this e na list (que veio do argumento) sao os mesmos
+        // fazer loop por this.products
+        // dar merge de cada um com os counters dos products da list correspondentes
 
         System.out.println("Lista dos produtos depois do join NO CLIENT: " + this.products);
         System.out.println("AddWins do this depois do join NO CLIENT:" + addWins.toString());
@@ -233,6 +237,7 @@ public class ShoppingList {
         System.out.println("save");
         System.out.println(this.getProducts());
         saveToFile();
+        System.out.println("finished save to file");
     }
 
 }
