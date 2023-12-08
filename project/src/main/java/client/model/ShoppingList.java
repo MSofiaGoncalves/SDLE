@@ -212,6 +212,7 @@ public class ShoppingList {
         }
         for(Triple<String, String, Long> triple : this.addWins.getSet()){
             if(!this.products.containsKey(triple.getSecond())){
+                System.out.println("doesnt contain: " + triple.getSecond());
                 Product p = new Product(triple.getSecond(), 0);
                 this.products.put(p.getName(), p);
             }
