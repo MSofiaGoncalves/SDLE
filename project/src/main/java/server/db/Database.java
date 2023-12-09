@@ -14,6 +14,8 @@ import ch.qos.logback.classic.Level;
 import server.Store;
 import server.model.ShoppingList;
 
+import java.util.List;
+
 /**
  * Database class
  * <p>
@@ -97,6 +99,14 @@ public class Database {
         FindIterable<ShoppingList> documents = collection.find(filter);
 
         return documents.first();
+    }
+
+    public List<ShoppingList> readAllLists() {
+        MongoCollection<ShoppingList> collection = getCollection();
+
+        FindIterable<ShoppingList> documents = collection.find();
+
+        return documents.into(new java.util.ArrayList<>());
     }
 
     /**

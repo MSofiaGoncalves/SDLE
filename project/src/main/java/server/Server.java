@@ -1,8 +1,15 @@
 package server;
 
 import org.zeromq.ZMQ;
+import server.connections.NodeConnector;
 import server.threads.ClientHandler;
+import server.threads.FailureDetector;
 import server.threads.NodeHandler;
+
+import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 
@@ -13,12 +20,14 @@ public class Server {
         store.initConnections();
         checkParams();
         ZMQ.Socket clientBroker = store.getClientBroker();
+        ZMQ.Socket nodeBroker = store.getNodeBroker();
 
         ZMQ.Poller poller = store.getContext().createPoller(1);
         poller.register(clientBroker, ZMQ.Poller.POLLIN);
-        for (ZMQ.Socket node: store.getNodes().values()) {
-            poller.register(node, ZMQ.Poller.POLLIN);
-        }
+        poller.register(nodeBroker, ZMQ.Poller.POLLIN);
+
+        startFailureDetector();
+        sendHeartbeats();
 
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll();
@@ -33,15 +42,12 @@ public class Server {
 
                 ClientHandler clientHandler = new ClientHandler(clientIdentity, request);
                 store.execute(clientHandler);
-            } else { // Node message
-                for (int i = 1; i < poller.getSize(); i++) {
-                    if (poller.pollin(i)) {
-                        ZMQ.Socket node = poller.getSocket(i);
-                        byte[] msg = node.recv();
-                        NodeHandler nodeHandler = new NodeHandler(node, new String(msg, ZMQ.CHARSET));
-                        store.execute(nodeHandler);
-                    }
-                }
+            }
+            if (poller.pollin(1)) { // Node message
+                byte[] identity = nodeBroker.recv();
+                byte[] msg = nodeBroker.recv();
+                NodeHandler nodeHandler = new NodeHandler(new String(identity, ZMQ.CHARSET), new String(msg, ZMQ.CHARSET));
+                store.execute(nodeHandler);
             }
         }
     }
@@ -77,5 +83,34 @@ public class Server {
             Store.logger.warning("Quorum number is less than quorum reads. Setting quorum number to quorum reads.");
             store.setProperty("quorumNumber", store.getProperty("quorumReads"));
         }
+    }
+
+    private static void startFailureDetector() {
+        FailureDetector failureDetector = new FailureDetector();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(failureDetector, 0, Integer.parseInt(Store.getProperty("failureTimeout")), TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * When starting, the node will try to connect to all other nodes during 10 seconds.
+     */
+    private static void sendHeartbeats() {
+        Thread thread = new Thread(() -> {
+            Instant start = Instant.now();
+            try {
+                while (Instant.now().isBefore(start.plusMillis(10000))) {
+                    Thread.sleep(1000);
+                    for (String node : Store.getInstance().getNodes()) {
+                        if (node.equals(Store.getProperty("nodehost"))) continue;
+                        if (Store.getInstance().getHashRing().getNodeStatus(node)) continue;
+                        Store.getInstance().getNodeBroker().connect(node);
+                        new NodeConnector(node).sendHeartbeat();
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
     }
 }
