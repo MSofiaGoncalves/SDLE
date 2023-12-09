@@ -52,13 +52,12 @@ public class Store {
      * Should be called <strong>once</strong> when the server starts.
      */
     public void initConnections() {
+        initLogger();
         Database.getInstance();
 
         if (context != null) {
             return;
         }
-
-        initHosts();
 
         try {
             context = new ZContext();
@@ -189,6 +188,7 @@ public class Store {
         } catch (Exception e) {
             throw new RuntimeException("Unable to load properties file: " + filePath, e);
         }
+        initHosts();
     }
 
     /**

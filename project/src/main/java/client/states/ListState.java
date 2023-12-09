@@ -5,6 +5,7 @@ import client.model.ShoppingList;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,12 +22,13 @@ public class ListState implements State {
     }
 
     public State step() {
-        if (shoppingList == null) {
+        if (shoppingList == null) { //When the option to open a list by ID is used
             System.out.print("List id: ");
             Scanner in = new Scanner(System.in);
             String listId = in.nextLine();
             this.shoppingList = Session.getSession().getList(listId);
             if (this.shoppingList == null) { // non existent
+                System.out.println("List does not exist.");
                 return new HubState();
             }
         }
