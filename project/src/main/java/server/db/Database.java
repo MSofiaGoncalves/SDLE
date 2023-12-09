@@ -91,6 +91,18 @@ public class Database {
         return true;
     }
 
+    public boolean removeList(ShoppingList list){
+        MongoCollection<ShoppingList> collection = getCollection();
+
+        try {
+            Bson filter = Filters.eq("id", list.getId());
+            collection.deleteOne(filter);
+        } catch (com.mongodb.MongoWriteException e) {
+            System.out.println("Error in database removing list.");
+        }
+        return true;
+    }
+
     /**
      * Get a list from the database.
      *

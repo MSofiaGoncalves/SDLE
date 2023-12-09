@@ -49,6 +49,11 @@ public class Session {
         return shoppingList;
     }
 
+    public void deleteList(ShoppingList shoppingList) {
+        this.lists.remove(shoppingList);
+        //retirar ficheiro json
+    }
+
     /**
      * Gets a list from the server or from local storage.
      * @param id Id of the list to get.

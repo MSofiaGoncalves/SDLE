@@ -7,8 +7,10 @@ import java.util.Scanner;
 
 public class ListIndexIDState implements State{
     private final List<ShoppingList> lists;
-    ListIndexIDState(List<ShoppingList> lists) {
+    private String action;
+    ListIndexIDState(List<ShoppingList> lists, String action) {
         this.lists = lists;
+        this.action = action;
     }
     @Override
     public State step() {
@@ -22,8 +24,13 @@ public class ListIndexIDState implements State{
         int index = in.nextInt();
         if(index >= lists.size()){
             System.out.println("Index out of range.");
-            return new ListIndexIDState(lists);
+            return new ListIndexIDState(lists, action);
         }
-        return new ListState(lists.get(index));
+        if(action.equals("view")) {
+            return new ListState(lists.get(index));
+        }
+        else{
+            return new DeleteListState(lists.get(index));
+        }
     }
 }

@@ -16,8 +16,10 @@ import crdts.utils.Triple;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.*;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 public class ShoppingList {
     private String id;
@@ -193,6 +195,68 @@ public class ShoppingList {
             System.out.println("Error saving to file asynchronously: " + e.getMessage());
         }
     }
+
+    public void removeFromFile() {
+        String username = Session.getSession().getUsername();
+        String directoryPath = "src/main/java/client/lists/" + username + "/";
+        String fileName = directoryPath + this.id + ".json";
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        try {
+            Path path = Paths.get(fileName);
+            File file = path.toFile();
+
+            if (file.exists()) {
+                CompletableFuture.runAsync(() -> {
+                    if (file.delete()) {
+                        System.out.println("File deleted successfully: " + fileName);
+                        future.complete(null);
+                    } else {
+                        System.out.println("Failed to delete file: " + fileName);
+                        future.completeExceptionally(new RuntimeException("Failed to delete file: " + fileName));
+                    }
+                });
+            } else {
+                System.out.println("File does not exist: " + fileName);
+                future.complete(null);
+            }
+        } catch (Exception e) {
+            System.out.println("Error removing file: " + e.getMessage());
+            future.completeExceptionally(e);
+        }
+
+
+    }
+
+    // Define a custom CompletionHandler
+    private class MyCompletionHandler implements java.nio.channels.CompletionHandler<Integer, Void> {
+        private final AsynchronousFileChannel fileChannel;
+        private final String fileName;
+
+        public MyCompletionHandler(AsynchronousFileChannel fileChannel, String fileName) {
+            this.fileChannel = fileChannel;
+            this.fileName = fileName;
+        }
+
+        @Override
+        public void completed(Integer result, Void attachment) {
+            try {
+                // Close the file channel
+                fileChannel.close();
+                System.out.println("File deleted successfully: " + fileName);
+            } catch (Exception e) {
+                System.out.println("Error closing file channel: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void failed(Throwable exc, Void attachment) {
+            System.out.println("Failed to remove file: " + fileName + ", Error: " + exc.getMessage());
+        }
+    }
+
+
 
     public AddWins getAddWins() {
         return addWins;

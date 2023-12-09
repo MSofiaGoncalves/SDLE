@@ -29,6 +29,6 @@ public class ListingState implements State {
             TablePrinter.printTable(table);
         }
 
-        return displayOptions(List.of("View List", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new ListIndexIDState(lists), new HubState(), null)));
+        return displayOptions(List.of("View List", "Delete List", "Go back", "Exit"), new ArrayList<>(Arrays.asList(new ListIndexIDState(lists, "view"), new ListIndexIDState(lists, "delete"), new HubState(), null)));
     }
 }
