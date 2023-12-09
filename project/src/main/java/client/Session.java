@@ -67,7 +67,7 @@ public class Session {
         ShoppingList shoppingList = connector.readList(id);
         ShoppingList clientList = isLocalList(id);
         if(clientList != null && shoppingList != null){
-            clientList.mergeListsClient(shoppingList);
+            shoppingList.mergeListsClient(clientList);
             return clientList;
         }
         if (shoppingList != null) {
