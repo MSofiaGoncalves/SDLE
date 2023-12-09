@@ -40,11 +40,7 @@ public class Session {
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
-        try {
-            refresher.awaitTermination(2 * Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        stopRefresher();
         ShoppingList shoppingList = new ShoppingList(name);
         this.lists.put(shoppingList.getId(), shoppingList);
         return shoppingList;
@@ -56,6 +52,7 @@ public class Session {
      * @return The list with the given id.
      */
     public ShoppingList getList(String id) {
+        stopRefresher();
         ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = connector.readList(id);
         if (shoppingList != null) {
@@ -82,13 +79,17 @@ public class Session {
                 if (shoppingList != null) {
                     this.lists.put(shoppingList.getId(), shoppingList);
                 }
+                else {
+                    System.out.println("hereeeee");
+                    stopRefresher();
+                }
         };
         refresher.scheduleAtFixedRate(runnable, 0, Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
     }
 
     public void stopRefresher() {
         if (refresher == null) return;
-        refresher.shutdown();
+        refresher.shutdownNow();
     }
 
     /**

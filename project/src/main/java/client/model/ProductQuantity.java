@@ -43,4 +43,11 @@ public class ProductQuantity {
     public String toString() {
         return "(" + quantity + ", " + quantityBought + ')';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof ProductQuantity other)) return false;
+        return this.quantity == other.quantity && this.quantityBought == other.quantityBought;
+    }
 }

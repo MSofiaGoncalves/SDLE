@@ -54,4 +54,5 @@ public interface State {
         }
         return states.get(options.size() - 1 - Integer.parseInt(option));
     }
+
 }

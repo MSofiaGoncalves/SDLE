@@ -121,6 +121,17 @@ public class ShoppingList {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ShoppingList list)) {
+            return false;
+        }
+        return this.id.equals(list.getId()) && this.name.equals(list.getName()) && this.products.equals(list.getProducts());
+    }
+
     private void saveToFile() {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();

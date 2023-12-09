@@ -25,6 +25,8 @@ public class ServerConnector {
         try {
             context = new ZContext();
             socket = context.createSocket(ZMQ.REQ);
+            socket.setReqRelaxed(true);
+            socket.setSendTimeOut(2 * Integer.parseInt(Session.getSession().getProperty("refreshTime")));
             for (String host : Session.getSession().getProperty("nodes").split(";")) {
                 socket.connect(host);
             }
@@ -53,10 +55,20 @@ public class ServerConnector {
      */
     public ShoppingList readList(String id) {
         String request = String.format("{\"method\":\"read\", \"listId\":\"%s\"}", id);
-        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        socket.send(request.getBytes(ZMQ.CHARSET), ZMQ.NOBLOCK);
 
-        byte[] reply = socket.recv(0);
-        return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
+        ZMQ.Poller poller = context.createPoller(1);
+        poller.register(socket, ZMQ.Poller.POLLIN);
+
+        long timeout = 2 * Long.parseLong(Session.getSession().getProperty("refreshTime"));
+
+        int pollResult = poller.poll(timeout);
+
+        if (pollResult == -1 || pollResult == 0) {
+            return null;
+        } else {
+            byte[] reply = socket.recv(0);
+            return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
+        }
     }
-
 }
