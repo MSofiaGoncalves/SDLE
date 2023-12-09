@@ -146,6 +146,6 @@ public class AddWins {
         if (!(o instanceof AddWins addWins)) {
             return false;
         }
-        return this.set.equals(addWins.set) && this.cc.equals(addWins.cc);
+        return this.set.equals(addWins.set);
     }
 }

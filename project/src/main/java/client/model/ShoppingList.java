@@ -25,7 +25,6 @@ public class ShoppingList {
     private String id;
     private String name;
 
-    //String is the name of the product, Product is the product itself
     private Map<String, Product> products;
 
     private AddWins addWins;
@@ -287,11 +286,8 @@ public class ShoppingList {
 
     public void mergeListsClient(ShoppingList list){
         this.addWins.join(list.getAddWins());
-        System.out.println("Lista dos produtos antes do join NO CLIENT: " + this.products);
-        System.out.println(this.products.keySet());
         Set<String> keySet = this.products.keySet();
         for(String key : keySet){
-            System.out.println("Key: " + key);
             if(!this.addWins.containsProduct(key)) {
                 System.out.println("A remover produto: " + key);
                 this.deleteProduct(key);
@@ -299,30 +295,16 @@ public class ShoppingList {
         }
         for(Triple<String, String, Long> triple : this.addWins.getSet()){
             if(!this.products.containsKey(triple.getSecond())){
-                System.out.println("doesnt contain: " + triple.getSecond());
                 Product p = new Product(triple.getSecond(), 0);
                 this.products.put(p.getName(), p);
             }
         }
 
-        // pn counter:
-        // agora sabemos que os produtos no this e na list (que veio do argumento) sao os mesmos
-        // fazer loop por this.products
-        // dar merge de cada um com os counters dos products da list correspondentes
-
         for (Map.Entry<String, Product> product : products.entrySet()) {
-            System.out.println("Product no merge de quantidades:" + product);
-            //Também alterei aqui
             if(this.getProducts().containsKey(product.getKey()) && list.getProducts().containsKey(product.getKey())){
-                System.out.println("Key:" + product.getKey());
-                //System.out.println("list.getProducts().get(product.getKey()): " + list.getProducts().get(product.getKey()).getPncounter().toString());
                 product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
-                //System.out.println("Product depois do merge:" + list.getProducts().get(product.getKey().getPnCounter().toString());
             }
         }
-
-        System.out.println("Lista dos produtos depois do join NO CLIENT: " + this.products);
-        System.out.println("AddWins do this depois do join NO CLIENT:" + addWins.toString());
     }
 
     /**

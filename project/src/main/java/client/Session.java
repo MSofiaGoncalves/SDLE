@@ -91,6 +91,11 @@ public class Session {
         Runnable runnable = () -> {
                 ServerConnector connector = Session.getConnector();
                 ShoppingList shoppingList = connector.readList(id);
+                ShoppingList clientList = isLocalList(id);
+                if(clientList != null && shoppingList != null){
+                    shoppingList.mergeListsClient(clientList);
+                    this.lists.put(id, shoppingList);
+                }
                 if (shoppingList != null) {
                     this.lists.put(shoppingList.getId(), shoppingList);
                 }
