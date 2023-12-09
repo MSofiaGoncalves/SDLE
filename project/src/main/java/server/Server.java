@@ -48,16 +48,16 @@ public class Server {
 
     private static void parseArgs(String[] args) {
         Store store = Store.getInstance();
-        Store.initLogger();
         if (args.length == 0) {
-            Store.logger.info("Usage: server <clienthost> <nodehost>");
-            Store.logger.info("Warning: No hostname specified, using defaults.");
+            System.out.println("Usage: server <clienthost> <nodehost>");
+            System.out.println("Warning: No hostname specified, using defaults.");
             return;
         }
         store.setProperty("clienthost", args[0]);
         if (args.length >= 2) {
             store.setProperty("nodehost", args[1]);
         }
+        Store.initLogger();
     }
 
     /**
