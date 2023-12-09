@@ -88,6 +88,7 @@ public class ShoppingList {
         else{
             System.out.println("Invalid product.");
         }
+        save();
     }
 
     public void removeProductQuantity(String name, int quantity) {
@@ -329,12 +330,12 @@ public class ShoppingList {
      * Should be called everytime the list is modified.
      */
     private void save() {
+        Session.getSession().addShoppingList(this);
         Session.getConnector().writeList(this);
         System.out.println("save");
         System.out.println(this.getProducts());
         saveToFile();
         System.out.println("finished save to file");
-        Session.getSession().addShoppingList(this);
     }
 
 }
