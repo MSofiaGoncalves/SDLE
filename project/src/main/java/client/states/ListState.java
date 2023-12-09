@@ -77,12 +77,13 @@ public class ListState implements State {
      */
     private Thread getReaderThread(State[] s) {
         return new Thread(() -> {
-            List<String> options = List.of("Add item", "Delete item", "Add quantity", "Buy quantity", "Go back", "Exit");
+            List<String> options = List.of("Add item", "Delete item", "Add quantity", "Buy quantity", "Delete Quantity", "Go back", "Exit");
             List<State> states = new ArrayList<>(Arrays.asList(
                     new AddProductState(this.shoppingList),
                     new DeleteProductState(this.shoppingList),
                     new EditProductState(this.shoppingList, "add"),
                     new EditProductState(this.shoppingList, "buy"),
+                    new EditProductState(this.shoppingList, "remove"),
                     new HubState(),
                     null
             ));
