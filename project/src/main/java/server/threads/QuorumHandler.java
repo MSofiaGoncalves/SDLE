@@ -20,7 +20,7 @@ enum QuorumMode {
  */
 public class QuorumHandler implements Runnable {
     private byte[] clientIdentity;
-    private ZMQ.Socket nodeSocket;
+    private String nodeAddress;
     private String redirectId;
     private String listId;
     private QuorumMode operation;
@@ -57,8 +57,8 @@ public class QuorumHandler implements Runnable {
         this.clientIdentity = clientIdentity;
     }
 
-    public void setNodeSocket(ZMQ.Socket nodeSocket) {
-        this.nodeSocket = nodeSocket;
+    public void setNodeAddress(String nodeAddress) {
+        this.nodeAddress = nodeAddress;
     }
 
     public void setRedirectId(String redirectId) {
@@ -67,7 +67,7 @@ public class QuorumHandler implements Runnable {
 
     @Override
     public void run() {
-        if (clientIdentity == null && nodeSocket == null) {
+        if (clientIdentity == null && nodeAddress == null) {
             throw new IllegalStateException("Must set either clientIdentity or nodeSocket.");
         }
         if (operation == QuorumMode.READ) {
@@ -88,7 +88,7 @@ public class QuorumHandler implements Runnable {
         Store store = Store.getInstance();
         int writeN = Integer.parseInt(Store.getProperty("quorumWrites"));
         QuorumStatus quorumStatus =
-                new QuorumStatus(writeN, nodeSocket, clientIdentity, redirectId);
+                new QuorumStatus(writeN, nodeAddress, clientIdentity, redirectId);
         quorumStatus.increment();
         store.getQuorums().put(quorumStatus.getId(), quorumStatus);
 
@@ -113,7 +113,7 @@ public class QuorumHandler implements Runnable {
         Store store = Store.getInstance();
         int readN = Integer.parseInt(Store.getProperty("quorumReads"));
         QuorumStatus quorumStatus =
-                new QuorumStatus(readN, nodeSocket, clientIdentity, redirectId);
+                new QuorumStatus(readN, nodeAddress, clientIdentity, redirectId);
 
         // Read from local database
         Store.getLogger().info("Reading list: " + listId + " from database.");

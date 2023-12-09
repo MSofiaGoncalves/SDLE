@@ -2,6 +2,8 @@ package server.model;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 /**
  * Represents a message sent from the client to the server.
  *
@@ -15,9 +17,16 @@ public class Message {
     private String method;
     private String listId;
     private ShoppingList list;
-    private String address; // use to identify clients
+    private List<ShoppingList> lists;
+    private String address;
     private String quorumId;
     private String redirectId;
+
+    // status update
+    private String statusNodeAddress;
+    private Boolean statusValue;
+
+    public Message() {}
 
     public Message(String message) {
         new Gson().fromJson(message, Message.class);
@@ -50,5 +59,53 @@ public class Message {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getStatusNodeAddress() {
+        return statusNodeAddress;
+    }
+
+    public Boolean getStatusValue() {
+        return statusValue;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public void setList(ShoppingList list) {
+        this.list = list;
+    }
+
+    public void setQuorumId(String quorumId) {
+        this.quorumId = quorumId;
+    }
+
+    public void setListId(String listId) {
+        this.listId = listId;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setStatusNodeAddress(String statusNodeAddress) {
+        this.statusNodeAddress = statusNodeAddress;
+    }
+
+    public void setStatusValue(Boolean statusValue) {
+        this.statusValue = statusValue;
+    }
+
+    public void setRedirectId(String redirectId) {
+        this.redirectId = redirectId;
+    }
+
+    public List<ShoppingList> getLists() {
+        return lists;
+    }
+
+    public void setLists(List<ShoppingList> lists) {
+        this.lists = lists;
     }
 }

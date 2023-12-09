@@ -87,7 +87,5 @@ public class ServerConnector {
 
         String[] temp = getProperty("serverhost").split(":");
         setProperty("serverPort", temp[temp.length - 1]);
-
-
     }
 }
