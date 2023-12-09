@@ -1,9 +1,16 @@
 package client;
 
 import client.model.ShoppingList;
+import com.google.gson.Gson;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.Future;
 
 /**
  * Singleton class that holds the current session.
@@ -26,6 +33,10 @@ public class Session {
         return connector;
     }
 
+    public void addShoppingList(ShoppingList shoppingList){
+        this.lists.put(shoppingList.getId(), shoppingList);
+    }
+
     /**
      * Creates a list.
      * Saves it to local storage and sends it to the server.
@@ -38,18 +49,45 @@ public class Session {
         return shoppingList;
     }
 
+    public void deleteList(ShoppingList shoppingList) {
+        this.lists.remove(shoppingList);
+        //retirar ficheiro json
+    }
+
     /**
      * Gets a list from the server or from local storage.
      * @param id Id of the list to get.
      * @return The list with the given id.
      */
     public ShoppingList getList(String id) {
+
+        // Ver se a lista existe localmente (diretorio do user)
+        // Se existir dar merge com a que vem do connector
+        // Se não existir, retornar a que veio
+
         ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = connector.readList(id);
+        ShoppingList clientList = isLocalList(id);
+        if(clientList != null && shoppingList != null){
+            clientList.mergeListsClient(shoppingList);
+            return clientList;
+        }
         if (shoppingList != null) {
             this.lists.put(shoppingList.getId(), shoppingList);
         }
         return this.lists.get(id);
+    }
+
+    /**
+     * Checks if a shopping list with the given id exists in the client's folder
+     * @param id
+     * @return shopping list if it exists and null if it doesn't
+     */
+    public ShoppingList isLocalList(String id){
+        if(lists.containsKey(id)){
+            return lists.get(id);
+        }
+        return null;
     }
 
     /**
@@ -95,6 +133,21 @@ public class Session {
         }
         username = name;
         lists = loadListsFromFiles();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(this);
+        System.out.println("Json: " + json);
+        String directoryPath = "src/main/java/client/lists/" + username + "/";
+        System.out.println("Directory created!: " + directoryPath);
+        try {
+            File directory = new File(directoryPath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error saving to file asynchronously: " + e.getMessage());
+        }
     }
 
     public static synchronized Session getSession() {
