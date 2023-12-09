@@ -181,6 +181,18 @@ public class NodeConnector {
     }
 
     /**
+     * Sent list of lists to be relocated
+     *
+     * @param lists   The lists to transfer.
+     */
+    public void sendHandoff(List<ShoppingList> lists) {
+        Message message = new Message();
+        message.setMethod("handoff");
+        message.setLists(lists);
+        sendMessage(message);
+    }
+
+    /**
      * Send a heartbeat to another node.
      */
     public void sendHeartbeat() {
