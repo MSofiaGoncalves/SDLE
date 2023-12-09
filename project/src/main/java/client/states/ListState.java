@@ -3,6 +3,7 @@ package client.states;
 import client.Session;
 import client.model.ShoppingList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,13 +20,31 @@ public class ListState implements State {
     }
 
     public State step() {
-        if (shoppingList == null) {
+        if (shoppingList == null) { //When the option to open a list by ID is used
             System.out.print("List id: ");
             Scanner in = new Scanner(System.in);
             String listId = in.nextLine();
             this.shoppingList = Session.getSession().getList(listId);
             if (this.shoppingList == null) { // non existent
+                System.out.println("List does not exist.");
                 return new HubState();
+            }
+            String directoryPath = "src/main/java/client/lists/" + Session.getSession().getUsername();
+            String fileName = listId + ".json";
+
+            File directory = new File(directoryPath);
+            System.out.println("Directory: " + directory.getAbsolutePath());
+            if (directory.exists() && directory.isDirectory()) {
+                File file = new File(directory, fileName);
+
+                if (file.exists()) {
+                    System.out.println("File exists: " + file.getAbsolutePath());
+                } else {
+                    shoppingList.saveToFile();
+                    Session.getSession().addShoppingList(shoppingList);
+                }
+            } else {
+                System.out.println("Directory does not exist.");
             }
         }
 
@@ -39,8 +58,8 @@ public class ListState implements State {
             this.shoppingList.printProducts();
         }
 
-        return displayOptions(List.of("Add item", "Delete item", "Add quantity", "Buy quantity", "Go back", "Exit"),
-                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new DeleteProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
+        return displayOptions(List.of("Add item", "Delete item", "Add quantity", "Remove quantity",  "Buy quantity", "Go back", "Exit"),
+                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new DeleteProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "remove"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
     }
 }
 
