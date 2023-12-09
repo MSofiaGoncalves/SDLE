@@ -58,9 +58,9 @@ public class Database {
             IndexOptions indexOptions = new IndexOptions().unique(true);
             getCollection().createIndex(indexKeys, indexOptions);
         } catch (Exception e) {
-            System.out.println("Error connecting to database");
-            System.out.println(e.getMessage());
+            Store.getLogger().severe("Error connecting to database: " + e.getMessage());
         }
+        Store.getLogger().info(String.format("Database connection established at %s (%s).", uri, database.getName()));
     }
 
     /**
@@ -79,6 +79,9 @@ public class Database {
                 Bson filter = Filters.eq("id", list.getId());
                 collection.replaceOne(filter, list);
             }
+        } catch (Exception e) {
+            Store.getLogger().severe("Error inserting list: " + e.getMessage());
+            return false;
         }
         return true;
     }

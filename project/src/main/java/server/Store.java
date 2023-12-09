@@ -2,6 +2,7 @@ package server;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
+import server.db.Database;
 import server.model.HashRing;
 import server.model.QuorumStatus;
 
@@ -51,6 +52,8 @@ public class Store {
      * Should be called <strong>once</strong> when the server starts.
      */
     public void initConnections() {
+        Database.getInstance();
+
         if (context != null) {
             return;
         }
@@ -124,6 +127,9 @@ public class Store {
     }
 
     public static void initLogger() {
+        String[] temp = getProperty("clienthost").split(":");
+        Store.getInstance().setProperty("id", temp[temp.length - 1]);
+
         logger = Logger.getLogger("server");
         logger.setUseParentHandlers(false);
         ConsoleHandler consoleHandler = new ConsoleHandler();
