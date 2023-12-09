@@ -63,7 +63,6 @@ public class Server {
         if (args.length >= 2) {
             store.setProperty("nodehost", args[1]);
         }
-        Store.initLogger();
     }
 
     /**
