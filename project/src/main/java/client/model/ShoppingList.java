@@ -115,8 +115,8 @@ public class ShoppingList {
         try (Reader reader = new FileReader(fileName)) {
             Gson gson = new Gson();
             return gson.fromJson(reader, ShoppingList.class);
-        } catch (IOException e) {
-            System.out.println("Error loading from file.");
+        } catch (Exception e) {
+            System.out.println("Error loading from file: " + e.getMessage());
             return null;
         }
     }

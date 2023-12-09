@@ -3,20 +3,27 @@ package client;
 import client.model.ShoppingList;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Singleton class that holds the current session.
  */
 public class Session {
-    private HashMap<String, ShoppingList> lists;
+    private ConcurrentHashMap<String, ShoppingList> lists;
     private static Session instance;
     private static ServerConnector connector;
     public static String username;
+    private Properties properties;
+    ScheduledExecutorService refresher;
 
     public Session() {
-        lists = new HashMap<>();
-        connector = new ServerConnector();
+        initProperties();
+        lists = new ConcurrentHashMap<>();
     }
 
     public static ServerConnector getConnector() {
@@ -33,6 +40,11 @@ public class Session {
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
+        try {
+            refresher.awaitTermination(2 * Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         ShoppingList shoppingList = new ShoppingList(name);
         this.lists.put(shoppingList.getId(), shoppingList);
         return shoppingList;
@@ -50,6 +62,33 @@ public class Session {
             this.lists.put(shoppingList.getId(), shoppingList);
         }
         return this.lists.get(id);
+    }
+
+    public ShoppingList getLocalList(String id) {
+        return this.lists.get(id);
+    }
+
+    /**
+     * Gets a list from the server or from local storage. <br>
+     * This method is asynchronous. Does not return the list but updates the map.
+     * @param id Id of the list to get.
+     */
+    public void startRefresher(String id) {
+        stopRefresher();
+        refresher = Executors.newScheduledThreadPool(1);
+        Runnable runnable = () -> {
+                ServerConnector connector = Session.getConnector();
+                ShoppingList shoppingList = connector.readList(id);
+                if (shoppingList != null) {
+                    this.lists.put(shoppingList.getId(), shoppingList);
+                }
+        };
+        refresher.scheduleAtFixedRate(runnable, 0, Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
+    }
+
+    public void stopRefresher() {
+        if (refresher == null) return;
+        refresher.shutdown();
     }
 
     /**
@@ -94,7 +133,7 @@ public class Session {
             throw new RuntimeException("Username already set");
         }
         username = name;
-        lists = loadListsFromFiles();
+        this.lists = new ConcurrentHashMap<>(loadListsFromFiles());
     }
 
     public static synchronized Session getSession() {
@@ -102,5 +141,34 @@ public class Session {
             instance = new Session();
         }
         return instance;
+    }
+
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+    private void initProperties() {
+        if (properties == null)
+            properties = new Properties();
+        final String filePath = "src/main/java/client/client.properties";
+        try {
+            properties.load(new FileInputStream(filePath));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load properties file: " + filePath, e);
+        }
+        initHosts();
+    }
+
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
+    private void initHosts() {
+        if (getProperty("serverhost") == null) {
+            setProperty("serverhost", getProperty("serverhostdefault"));
+        }
+
+        String[] temp = getProperty("serverhost").split(":");
+        setProperty("serverPort", temp[temp.length - 1]);
     }
 }

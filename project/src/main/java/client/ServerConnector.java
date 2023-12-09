@@ -16,7 +16,6 @@ public class ServerConnector {
     private ZContext context;
     private ZMQ.Socket socket;
 
-    private Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
     /**
@@ -25,10 +24,8 @@ public class ServerConnector {
     public ServerConnector() {
         try {
             context = new ZContext();
-            initProperties();
-            initHosts();
             socket = context.createSocket(ZMQ.REQ);
-            for (String host : getProperty("nodes").split(";")) {
+            for (String host : Session.getSession().getProperty("nodes").split(";")) {
                 socket.connect(host);
             }
         } catch (Exception e) {
@@ -44,7 +41,9 @@ public class ServerConnector {
         String request = String.format("{\"method\":\"write\", \"list\":%s}", new Gson().toJson(shoppingList));
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
-        byte[] reply = socket.recv(0);
+        new Thread(() -> {
+            byte[] reply = socket.recv(0);
+        }).start();
     }
 
     /**
@@ -60,32 +59,4 @@ public class ServerConnector {
         return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
     }
 
-    public String getProperty(String key) {
-        return properties.getProperty(key);
-    }
-
-    private void initProperties() {
-        if (properties == null)
-            properties = new Properties();
-        final String filePath = "src/main/java/client/client.properties";
-        try {
-            properties.load(new FileInputStream(filePath));
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load properties file: " + filePath, e);
-        }
-    }
-
-    public void setProperty(String key, String value) {
-        properties.setProperty(key, value);
-    }
-
-
-    private void initHosts() {
-        if (getProperty("serverhost") == null) {
-            setProperty("serverhost", getProperty("serverhostdefault"));
-        }
-
-        String[] temp = getProperty("serverhost").split(":");
-        setProperty("serverPort", temp[temp.length - 1]);
-    }
 }

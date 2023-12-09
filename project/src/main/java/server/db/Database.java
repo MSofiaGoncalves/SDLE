@@ -57,10 +57,10 @@ public class Database {
             Document indexKeys = new Document("id", 1);
             IndexOptions indexOptions = new IndexOptions().unique(true);
             getCollection().createIndex(indexKeys, indexOptions);
+            Store.getLogger().info(String.format("Database connection established at %s (%s).", uri, database.getName()));
         } catch (Exception e) {
             Store.getLogger().severe("Error connecting to database: " + e.getMessage());
         }
-        Store.getLogger().info(String.format("Database connection established at %s (%s).", uri, database.getName()));
     }
 
     /**

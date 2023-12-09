@@ -28,6 +28,7 @@ public class ListState implements State {
                 return new HubState();
             }
         }
+        Session.getSession().startRefresher(shoppingList.getId());
 
         breakLn();
         printTitle("List " + shoppingList.getName());
@@ -39,8 +40,24 @@ public class ListState implements State {
             this.shoppingList.printProducts();
         }
 
-        return displayOptions(List.of("Add item", "Delete item", "Add quantity", "Buy quantity", "Go back", "Exit"),
-                new ArrayList<>(Arrays.asList(new AddProductState(this.shoppingList), new DeleteProductState(this.shoppingList), new EditProductState(this.shoppingList, "add"), new EditProductState(this.shoppingList, "buy"), new HubState(), null)));
+        State s = displayOptions(List.of(
+                "Refresh", "Add item", "Delete item", "Add quantity", "Buy quantity", "Go back", "Exit"
+                ),
+                new ArrayList<>(Arrays.asList(
+                        new ListState(),
+                        new AddProductState(this.shoppingList),
+                        new DeleteProductState(this.shoppingList),
+                        new EditProductState(this.shoppingList, "add"),
+                        new EditProductState(this.shoppingList, "buy"),
+                        new HubState(),
+                        null
+                )));
+        Session.getSession().stopRefresher();
+
+        // refresh list
+        if (s instanceof ListState) s = new ListState(Session.getSession().getLocalList(shoppingList.getId()));
+
+        return s;
     }
 }
 
