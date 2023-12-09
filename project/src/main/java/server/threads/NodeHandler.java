@@ -18,26 +18,26 @@ import java.util.function.Function;
  * Handles messages from the nodes.
  */
 public class NodeHandler implements Runnable {
-    private ZMQ.Socket socket;
+    private String address;
     private String messageRaw;
     private Message message;
 
     /**
      * Creates a new NodeHandler.
-     * @param socket The socket to send replies to.
+     *
+     * @param address The address of the node that sent the message.
      * @param message The message to handle.
      */
-    public NodeHandler(ZMQ.Socket socket, String message) {
+    public NodeHandler(String address, String message) {
         this.messageRaw = message;
         try {
             this.message = new Gson().fromJson(messageRaw, Message.class);
-        }
-        catch (JsonSyntaxException e) { // message meant for other thread, ignore
+        } catch (JsonSyntaxException e) { // message meant for other thread, ignore
             Store.getLogger().warning("Received invalid message: " + messageRaw);
             return;
         }
 
-        this.socket = socket;
+        this.address = address;
     }
 
     @Override
@@ -53,7 +53,18 @@ public class NodeHandler implements Runnable {
         functionMap.put("redirectRead", this::redirectRead);
         functionMap.put("redirectReadReply", this::redirectReadReply);
 
+        functionMap.put("statusUpdate", this::statusUpdate);
+        functionMap.put("hintedHandoff", this::hintedHandoff);
+        functionMap.put("returnHinted", this::returnHinted);
+        functionMap.put("heartbeat", this::heartbeat);
+        functionMap.put("heartbeatReply", this::heartbeatReply);
+
         if (message == null || message.getMethod() == null) {
+            return;
+        }
+
+        if (functionMap.get(message.getMethod()) == null) {
+            Store.getLogger().warning("Received invalid message: " + messageRaw);
             return;
         }
 
@@ -69,7 +80,7 @@ public class NodeHandler implements Runnable {
     private Void writeList(Void unused) {
         Store.getLogger().info("Writing list, " + message.getList().getId() + ", into database.");
         Database.getInstance().insertList(message.getList());
-        new NodeConnector(socket).sendListWriteAck(message.getQuorumId());
+        new NodeConnector(address).sendListWriteAck(message.getQuorumId());
         return null;
     }
 
@@ -78,6 +89,7 @@ public class NodeHandler implements Runnable {
      * Update quorum status on the store.
      */
     private Void writeAck(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         Store.getLogger().info("Received write ack: " + message.getQuorumId());
         QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
@@ -96,7 +108,7 @@ public class NodeHandler implements Runnable {
     private Void redirectWrite(Void unused) {
         Store.getLogger().info("Received list write redirect: " + message.getList().getId());
         QuorumHandler quorum = new QuorumHandler(message.getList(), QuorumMode.WRITE);
-        quorum.setNodeSocket(socket);
+        quorum.setNodeAddress(address);
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -107,8 +119,9 @@ public class NodeHandler implements Runnable {
      * Sends a reply to the client.
      */
     private Void redirectWriteReply(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
-        ZMQ.Socket socket =  store.getClientBroker();
+        ZMQ.Socket socket = store.getClientBroker();
 
         byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
         store.getOngoingRedirects().remove(message.getRedirectId());
@@ -128,7 +141,7 @@ public class NodeHandler implements Runnable {
     private Void readList(Void unused) {
         Store.getLogger().info("Reading list, " + message.getListId() + " from database.");
         ShoppingList list = Database.getInstance().readList(message.getListId());
-        new NodeConnector(socket).sendListReadAck(list, message.getQuorumId());
+        new NodeConnector(address).sendListReadAck(list, message.getQuorumId());
         return null;
     }
 
@@ -137,6 +150,7 @@ public class NodeHandler implements Runnable {
      * Update quorum status on the store.
      */
     private Void readAck(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
         Store.getLogger().info("Received read ack: " + message.getQuorumId());
         QuorumStatus quorumStatus = store.getQuorums().get(message.getQuorumId());
@@ -156,7 +170,7 @@ public class NodeHandler implements Runnable {
     private Void redirectRead(Void unused) {
         Store.getLogger().info("Received list read redirect: " + message.getListId());
         QuorumHandler quorum = new QuorumHandler(message.getListId(), QuorumMode.READ);
-        quorum.setNodeSocket(socket);
+        quorum.setNodeAddress(address);
         quorum.setRedirectId(message.getRedirectId());
         quorum.run();
         return null;
@@ -167,8 +181,9 @@ public class NodeHandler implements Runnable {
      * Sends a reply to the client.
      */
     private Void redirectReadReply(Void unused) {
+        processResponse();
         Store store = Store.getInstance();
-        ZMQ.Socket socket =  store.getClientBroker();
+        ZMQ.Socket socket = store.getClientBroker();
 
         byte[] clientIdentity = store.getOngoingRedirects().get(message.getRedirectId());
         store.getOngoingRedirects().remove(message.getRedirectId());
@@ -180,5 +195,68 @@ public class NodeHandler implements Runnable {
         return null;
     }
 
+    /*************** Status ****************/
+
+    /**
+     * Receive a status update about a node. <br>
+     * Updates the status of the node on the hash ring.
+     */
+    private Void statusUpdate(Void unused) {
+        Store.getLogger().info("Received status update about node: " + message.getStatusNodeAddress());
+        Store.getInstance().getHashRing().updateNodeStatus(message.getStatusNodeAddress(), message.getStatusValue());
+        return null;
+    }
+
+    /**
+     * Process a hinted handoff list transfer. <br>
+     * List ids will be tagged in the hash ring to be return when the node comes back online.
+     */
+    private Void hintedHandoff(Void unused) {
+        Store.getLogger().info("Received hinted handoff of node: " + message.getAddress());
+        Store.getInstance().getHashRing().addHintedLists(message.getAddress(), message.getLists());
+        for (ShoppingList list : message.getLists()) {
+            Database.getInstance().insertList(list);
+        }
+        return null;
+    }
+
+    /**
+     * Receive hinted lists from another node.
+     */
+    private Void returnHinted(Void unused) {
+        Store.getLogger().info("Received hinted return from node: " + address + " (" + message.getLists().size() + " lists)");
+        for (ShoppingList list : message.getLists()) {
+            Database.getInstance().insertList(list);
+        }
+        return null;
+    }
+
+    /**
+     * Receive a heartbeat from another node. <br>
+     * Sends a reply and updates the status of the node on the hash ring.
+     */
+    private Void heartbeat(Void unused) {
+        Store.getLogger().info("Received heartbeat request from " + address);
+        new NodeConnector(address).sendHeartbeatReply();
+        Store.getInstance().getHashRing().updateNodeStatus(address, true);
+        return null;
+    }
+
+    /**
+     * Receive a heartbeat reply from another node. <br>
+     * Updates the status of the node on the hash ring.
+     */
+    private Void heartbeatReply(Void unused) {
+        Store.getLogger().info("Received heartbeat from " + address);
+        Store.getInstance().getHashRing().updateNodeStatus(address, true);
+        return null;
+    }
+
+    /**
+     * Remove the node from the waiting list.
+     */
+    private void processResponse() {
+        Store.getInstance().getWaitingReply().remove(address);
+    }
 
 }

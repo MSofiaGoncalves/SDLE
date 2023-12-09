@@ -14,6 +14,8 @@ import ch.qos.logback.classic.Level;
 import server.Store;
 import server.model.ShoppingList;
 
+import java.util.List;
+
 /**
  * Database class
  * <p>
@@ -40,7 +42,7 @@ public class Database {
      * Private constructor. Starts the MongoDB connection.
      */
     private Database() {
-        String uri = Store.getInstance().getProperty("dbHost");
+        String uri = Store.getProperty("dbHost");
         try {
             // Disable MongoDB logging
             ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
@@ -50,15 +52,15 @@ public class Database {
                     MongoClientSettings.getDefaultCodecRegistry()
             );
             mongoClient = MongoClients.create(uri);
-            database = mongoClient.getDatabase("db" + Store.getInstance().getProperty("id"));
+            database = mongoClient.getDatabase("db" + Store.getProperty("id"));
 
             Document indexKeys = new Document("id", 1);
             IndexOptions indexOptions = new IndexOptions().unique(true);
             getCollection().createIndex(indexKeys, indexOptions);
         } catch (Exception e) {
-            System.out.println("Error connecting to database");
-            System.out.println(e.getMessage());
+            Store.getLogger().severe("Error connecting to database: " + e.getMessage());
         }
+        Store.getLogger().info(String.format("Database connection established at %s (%s).", uri, database.getName()));
     }
 
     /**
@@ -87,6 +89,9 @@ public class Database {
                 //fazer replace
                 collection.replaceOne(filter, list);
             }
+        } catch (Exception e) {
+            Store.getLogger().severe("Error inserting list: " + e.getMessage());
+            return false;
         }
         return true;
     }
@@ -116,6 +121,14 @@ public class Database {
         FindIterable<ShoppingList> documents = collection.find(filter);
 
         return documents.first();
+    }
+
+    public List<ShoppingList> readAllLists() {
+        MongoCollection<ShoppingList> collection = getCollection();
+
+        FindIterable<ShoppingList> documents = collection.find();
+
+        return documents.into(new java.util.ArrayList<>());
     }
 
     /**
