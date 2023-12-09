@@ -21,14 +21,19 @@ public class ShoppingList {
     @BsonProperty("addWins")
     private AddWins addWins;
 
+    @BsonProperty("flag")
+    private boolean deleted;
+
     public ShoppingList() {
         this.products = new HashMap<>();
+        this.deleted = false;
     }
 
     public ShoppingList(String id, String name) {
         this.id = id;
         this.name = name;
         this.products = new HashMap<>();
+        this.deleted = false;
     }
 
     public String getId() {

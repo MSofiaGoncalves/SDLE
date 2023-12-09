@@ -30,11 +30,14 @@ public class ShoppingList {
 
     private AddWins addWins;
 
+    public boolean deleted;
+
     public ShoppingList(String name) {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(this.id);
+        this.deleted = false;
         save();
 
     }
@@ -44,10 +47,14 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(this.id);
+        this.deleted = false;
         saveToFile();
     }
 
 
+    public void setFlag(boolean flag){
+        this.deleted = flag;
+    }
     public String getId() {
         return this.id;
     }

@@ -17,6 +17,8 @@ public class DeleteListState implements State {
         shoppingList.removeFromFile();
         Session.getSession().deleteList(shoppingList);
 
+        shoppingList.setFlag(true);
+
         printLine("Deleted " + name);
 
         return new HubState();
