@@ -31,6 +31,7 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
      */
     @Override
     public ShoppingList decode(BsonReader reader, DecoderContext decoderContext) {
+        System.out.println("decode");
         ShoppingList shoppingList = new ShoppingList();
         reader.readStartDocument();
 
@@ -42,6 +43,7 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
             } else if (fieldName.equals("name")) {
                 shoppingList.setName(reader.readString());
             } else if (fieldName.equals("products")) {
+                System.out.println("products will be decoded");
                 Map<String, Product> products = decodeProducts(reader);
                 shoppingList.setProducts(products);
             } else if (fieldName.equals("addWins")) {
@@ -62,85 +64,105 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
      * @return the Map of products
      */
     private Map<String, Product> decodeProducts(BsonReader reader) {
+        System.out.println("decodeProducts");
         Map<String, Product> productMap = new HashMap<>();
 
+        //System.out.println("BSon type2:" + reader.readBsonType());
+        System.out.println("decodeProducts primeiro while");
+        String productName = null;
+        PNCounter pnCounter = null;
+        GCounter gCounter = null;
+
         reader.readStartArray();
+        //System.out.println("BSon type3:" + reader.getCurrentBsonType());
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            String productName = null;
-            int quantity = 0;
-            int quantityBought = 0;
-
+            System.out.println(reader.getCurrentBsonType());
+            System.out.println("decodeProducts segundo while");
             reader.readStartDocument();
-
             while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
                 String fieldName = reader.readName();
 
                 if (fieldName.equals("name")) {
                     productName = reader.readString();
-                } else if (fieldName.equals("pncounter")) {
+                } else if (fieldName.equals("pnCounter")) {
+                    String id = null;
+                    GCounter inc = null;
+                    GCounter dec = null;
+                    System.out.println("decodeProducts pncounter");
                     reader.readStartDocument();
 
                     while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
                         String counterType = reader.readName();
-
                         if (counterType.equals("id")) {
-                            reader.readString();
+                            id = reader.readString();
                         } else if (counterType.equals("inc")) {
-                            quantity = readCounterValue(reader);
+                            inc = readGCounter(reader);
                         } else if (counterType.equals("dec")) {
-                            reader.readStartDocument();
-                            reader.readEndDocument();
-                        } else {
-                            reader.skipValue();
+                            dec = readGCounter(reader);
+                        } else if (counterType.equals("_id")) { // ignore _id field
+                            reader.readObjectId();
                         }
                     }
-
                     reader.readEndDocument();
+
+                    pnCounter = new PNCounter(id, inc, dec);
+                } else if (fieldName.equals("gCounter")) {
+                    gCounter = readGCounter(reader);
+
                 } else {
                     reader.skipValue();
                 }
-            }
 
+
+                if (productName != null) {
+                    Product product = new Product(productName, pnCounter, gCounter);
+                    productMap.put(productName, product);
+                }
+            }
             reader.readEndDocument();
 
-            if (productName != null) {
-                Product product = new Product(productName, quantity, quantityBought);
-                productMap.put(productName, product);
-            }
         }
 
+        //System.out.println("BSon type6:" + reader.readBsonType());
         reader.readEndArray();
 
         return productMap;
     }
 
-    private int readCounterValue(BsonReader reader) {
-        int value = 0;
+    private GCounter readGCounter(BsonReader reader) {
+
+        String id = null;
+        Map<String, Integer> counterMap = new HashMap<>();
 
         reader.readStartDocument();
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
 
-            if (fieldName.equals("counters")) {
+            if (fieldName.equals("id")) {
+                id = reader.readString();
+            }
+            else if(fieldName.equals("counters")){
                 reader.readStartDocument();
 
                 while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-                    // Assuming the counter name is the same as the product name
-                    if (reader.readName().equals(fieldName)) {
-                        value = reader.readInt32();
-                    } else {
-                        reader.skipValue();
-                    }
+                    String key = reader.readName();
+                    int value = reader.readInt32();
+
+                    counterMap.put(key,value);
                 }
 
                 reader.readEndDocument();
-            } else {
+            }
+            else {
                 reader.skipValue();
             }
         }
         reader.readEndDocument();
 
-        return value;
+        GCounter gCounter = new GCounter(id);
+        gCounter.setCounters(counterMap);
+
+        return gCounter;
     }
 
     private AddWins decodeAddWins(BsonReader reader) {
@@ -222,6 +244,12 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
         return set;
     }
 
+
+    public String toString(BsonWriter writer){
+        return writer.toString();
+    }
+
+
     /**
      * Encode a ShoppingList object into a BSON document.
      * @param writer the BSON writer to encode into
@@ -243,6 +271,10 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
         encodesAddWins(writer, shoppingList.getAddWins());
 
         writer.writeEndDocument();
+
+        System.out.println("writer: " + toString(writer));
+        System.out.println("shoppingList: " + shoppingList);
+
     }
 
     private void encodeProducts(BsonWriter writer, Map<String, Product> products) {

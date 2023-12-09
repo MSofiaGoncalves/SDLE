@@ -23,6 +23,22 @@ public class Product {
         this.gCounter.increment(quantityBought);
     }
 
+    public Product(String name, PNCounter pnCounter, GCounter gCounter) {
+        this.name = name;
+        this.pnCounter = pnCounter;
+        this.gCounter = gCounter;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Product{name='").append(name).append('\'');
+        sb.append(", pnCounter=").append(pnCounter);
+        sb.append(", gCounter=").append(gCounter);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getName() {
         return name;
     }
@@ -65,6 +81,9 @@ public class Product {
 
 
     public void mergeProduct(Product product){
+        System.out.println("No mergeProduct");
+        System.out.println("This: " + this.getName());
+        //System.out.println("Product: " + product.getName());
         this.pnCounter.merge(product.getPnCounter());
         this.gCounter.merge(product.getGCounter());
     }

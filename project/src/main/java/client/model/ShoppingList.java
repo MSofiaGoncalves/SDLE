@@ -236,7 +236,8 @@ public class ShoppingList {
 
         for (Map.Entry<String, Product> product : products.entrySet()) {
             System.out.println("Product no merge de quantidades:" + product);
-            if(list.getProducts().containsKey(product.getKey())){
+            //Também alterei aqui
+            if(this.getProducts().containsKey(product.getKey()) && list.getProducts().containsKey(product.getKey())){
                 System.out.println("Key:" + product.getKey());
                 //System.out.println("list.getProducts().get(product.getKey()): " + list.getProducts().get(product.getKey()).getPncounter().toString());
                 product.getValue().mergeProduct(list.getProducts().get(product.getKey()));

@@ -92,9 +92,13 @@ public class ShoppingList {
         }
 
         for (Map.Entry<String, Product> product : products.entrySet()) {
+            System.out.println("A DAR MERGE DE QUANTIDADES!!!");
             System.out.println("Product no merge de quantidades:" + product);
-            if(this.getProducts().containsKey(product.getKey())){
+            //Alterei aqui, têm ambas de ter o elemento
+            if(this.getProducts().containsKey(product.getKey()) && list.getProducts().containsKey(product.getKey())){
+                System.out.println("ENTROU NO IF");
                 System.out.println("Key:" + product.getKey());
+                System.out.println("product.getValue(): " + product.getValue().toString());
                 //System.out.println("list.getProducts().get(product.getKey()): " + list.getProducts().get(product.getKey()).getPncounter().toString());
                 product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
                 //System.out.println("Product depois do merge:" + list.getProducts().get(product.getKey().getPnCounter().toString());

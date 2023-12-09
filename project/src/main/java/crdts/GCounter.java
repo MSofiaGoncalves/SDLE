@@ -12,6 +12,16 @@ public class GCounter {
         this.counters = new HashMap<>();
     }
 
+    public GCounter(String id, Map<String, Integer> counter) {
+        this.id = id;
+        this.counters = counter;
+    }
+
+    public void setCounters(Map<String, Integer> counters) {
+        this.counters.putAll(counters);
+    }
+
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
