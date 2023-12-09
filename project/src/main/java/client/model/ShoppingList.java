@@ -334,6 +334,7 @@ public class ShoppingList {
         System.out.println(this.getProducts());
         saveToFile();
         System.out.println("finished save to file");
+        Session.getSession().addShoppingList(this);
     }
 
 }

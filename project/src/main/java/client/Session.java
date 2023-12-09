@@ -95,11 +95,10 @@ public class Session {
                     this.lists.put(shoppingList.getId(), shoppingList);
                 }
                 else {
-                    System.out.println("hereeeee");
                     stopRefresher();
                 }
         };
-        refresher.scheduleAtFixedRate(runnable, 0, Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
+        refresher.scheduleAtFixedRate(runnable, Long.parseLong(getProperty("refreshTime")), Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
     }
 
     public void stopRefresher() {
