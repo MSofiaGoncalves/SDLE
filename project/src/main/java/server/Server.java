@@ -29,10 +29,18 @@ public class Server {
         startFailureDetector();
         sendHeartbeats();
 
+        Instant start = Instant.now();
+
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll();
 
-            if (poller.pollin(0)) { // Client message
+            if (poller.pollin(0) && !Instant.now().isBefore(start.plusMillis(5000))) { // Client message
+
+
+
+
+
+
                 byte[] clientIdentity = clientBroker.recv();
 
                 // Receive empty delimiter frame

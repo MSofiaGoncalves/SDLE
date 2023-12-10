@@ -125,7 +125,6 @@ public class ListState implements State {
             while (s[0] == null) {
                 try {
                     if (!this.shoppingList.equals(Session.getSession().getLocalList(shoppingList.getId()))) {
-                        System.out.println("YES VERY DIFFERENT");
                         s[0] = new ListState(Session.getSession().getLocalList(shoppingList.getId()));
                         readerThread.interrupt();
                     }

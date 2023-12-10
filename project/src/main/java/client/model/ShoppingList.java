@@ -185,17 +185,13 @@ public class ShoppingList {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        System.out.println("Current list: " + json);
         String directoryPath = "src/main/java/client/lists/" + username + "/";
         String fileName = directoryPath + this.id + ".json";
 
-        System.out.println("deleted here: " + this.deleted);
 
         try {
             Path path = Paths.get(fileName);
-            System.out.println("path: " + path);
             File directory = path.getParent().toFile();
-            System.out.println("directory: " + directory);
 
             if (!directory.exists()) {
                 directory.mkdirs();

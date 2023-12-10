@@ -135,7 +135,6 @@ public class Session {
             if (files != null) {
                 for (File file : files) {
                     ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
-                    System.out.println("IS DELETED = " + list.getDeleted());
                     if (list != null) {
                         shoppingLists.put(list.getId(), list);
                     }

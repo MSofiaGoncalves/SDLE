@@ -81,16 +81,10 @@ public class Product {
 
 
     public void mergeProduct(Product product){
-        System.out.println("No mergeProduct");
-        System.out.println("This: " + this.getName());
-        //System.out.println("Product: " + product.getName());
+
         this.pnCounter.merge(product.getPnCounter());
         this.gCounter.merge(product.getGCounter());
     }
 
-    /*
-    @Override
-    public String toString() {
-        return "(" + quantity + ", " + quantityBought + ')';
-    }*/
+
 }

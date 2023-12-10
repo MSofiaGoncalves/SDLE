@@ -12,13 +12,11 @@ public class DeleteListState implements State {
     }
 
     public State step() {
-        System.out.println("HERE");
         breakLn();
         String name = shoppingList.getName();
 
         shoppingList.deleteList();
 
-        System.out.println("Deleted " + name + " list: " + shoppingList.getDeleted());
 
         return new HubState();
     }

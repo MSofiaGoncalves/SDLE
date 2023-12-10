@@ -54,7 +54,6 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
             else if (fieldName.equals("deleted")) {
                 boolean deleted = reader.readBoolean();
                 shoppingList.setDeleted(deleted);
-                System.out.println("DEleted = " + deleted);
             }
             else if (fieldName.equals("_id")) { // ignore _id field
                 reader.readObjectId();
@@ -269,7 +268,6 @@ public class ShoppingListCodec implements Codec<ShoppingList> {
         writer.writeName("addWins");
         encodesAddWins(writer, shoppingList.getAddWins());
 
-        System.out.println("encode, deleted = " + shoppingList.getDeleted());
 
         writer.writeBoolean("deleted", shoppingList.getDeleted());
 

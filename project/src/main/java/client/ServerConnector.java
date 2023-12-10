@@ -43,9 +43,7 @@ public class ServerConnector {
         String request = String.format("{\"method\":\"write\", \"list\":%s}", new Gson().toJson(shoppingList));
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
-        new Thread(() -> {
-            byte[] reply = socket.recv(0);
-        }).start();
+
     }
 
     /**

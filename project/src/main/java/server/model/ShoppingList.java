@@ -103,7 +103,6 @@ public class ShoppingList {
         }
 
         if(this.deleted || list.getDeleted()){
-            System.out.println("DELETED");
             this.deleted = true;
         }
     }
