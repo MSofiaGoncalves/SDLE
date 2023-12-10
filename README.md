@@ -1,1 +1,1 @@
-The project is inside the ```project``` folder. The presentation and video are there too.
+The project is inside the ```project``` folder. The presentation is in there too. Github doens't allow videos bigger than 25 MB, so we uploaded ours to Youtube. Here is the link: https://youtu.be/siO3dizmz1Y
