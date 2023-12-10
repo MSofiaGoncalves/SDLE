@@ -20,12 +20,12 @@ public class ListState implements State {
     }
 
     public State step() {
-        if (shoppingList == null) { //When the option to open a list by ID is used
+        if (shoppingList == null) { // When the option to open a list by ID is used
             System.out.print("List id: ");
             Scanner in = new Scanner(System.in);
             String listId = in.nextLine();
             this.shoppingList = Session.getSession().getList(listId);
-            if (this.shoppingList == null) { // non existent
+            if (this.shoppingList == null || this.shoppingList.getDeleted()) { // non existent
                 System.out.println("List does not exist.");
                 return new HubState();
             }
@@ -33,7 +33,7 @@ public class ListState implements State {
             String fileName = listId + ".json";
 
             File directory = new File(directoryPath);
-            System.out.println("Directory: " + directory.getAbsolutePath());
+
             if (directory.exists() && directory.isDirectory()) {
                 File file = new File(directory, fileName);
 
@@ -46,6 +46,11 @@ public class ListState implements State {
             } else {
                 System.out.println("Directory does not exist.");
             }
+        }
+
+        if(this.shoppingList.getDeleted()){
+            System.out.println("List does not exist.");
+            return new HubState();
         }
 
         breakLn();

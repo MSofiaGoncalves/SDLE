@@ -70,10 +70,4 @@ public class Product {
         return this.pnCounter;
     }
 
-
-    /*
-    @Override
-    public String toString() {
-        return "(" + quantity + ", " + quantityBought + ')';
-    }*/
 }

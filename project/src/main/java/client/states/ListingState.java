@@ -13,8 +13,7 @@ public class ListingState implements State {
         breakLn();
         printTitle("Your Lists");
 
-        System.out.println("USER: " + Session.getSession().getUsername());
-        List<ShoppingList> lists = Session.getSession().getLists();
+        List<ShoppingList> lists = Session.getSession().getActiveLists();
 
         if (lists.isEmpty()) {
             System.out.println("\nYou don't have any lists yet!");
@@ -22,9 +21,11 @@ public class ListingState implements State {
         else {
             List<List<String>> table = new ArrayList<>();
             table.add(List.of("Index", "Name", "ID"));
-            for (int i = 0; i < lists.size(); i++) {
-                ShoppingList list = lists.get(i);
-                table.add(List.of(Integer.toString(i), list.getName(), list.getId()));
+            int index = 0;
+            while(index < lists.size()) {
+                ShoppingList list = lists.get(index);
+                table.add(List.of(Integer.toString(index), list.getName(), list.getId()));
+                index ++;
             }
             TablePrinter.printTable(table);
         }
