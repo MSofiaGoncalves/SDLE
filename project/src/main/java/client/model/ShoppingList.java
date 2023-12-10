@@ -25,7 +25,6 @@ public class ShoppingList {
     private String id;
     private String name;
 
-    //String is the name of the product, Product is the product itself
     private Map<String, Product> products;
 
     private AddWins addWins;
@@ -98,6 +97,7 @@ public class ShoppingList {
         else{
             System.out.println("Invalid product.");
         }
+        save();
     }
 
     public void removeProductQuantity(String name, int quantity) {
@@ -164,13 +164,24 @@ public class ShoppingList {
         try (Reader reader = new FileReader(fileName)) {
             Gson gson = new Gson();
             return gson.fromJson(reader, ShoppingList.class);
-        } catch (IOException e) {
-            System.out.println("Error loading from file.");
+        } catch (Exception e) {
+            System.out.println("Error loading from file: " + e.getMessage());
             return null;
         }
     }
 
-    public void saveToFile() {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ShoppingList list)) {
+            return false;
+        }
+        return this.id.equals(list.getId()) && this.name.equals(list.getName()) && this.products.equals(list.getProducts());
+    }
+
+    private void saveToFile() {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
@@ -220,7 +231,6 @@ public class ShoppingList {
 
     public void mergeListsClient(ShoppingList list){
         this.addWins.join(list.getAddWins());
-        System.out.println(this.products.keySet());
         Set<String> keySet = this.products.keySet();
         for(String key : keySet){
             if(!this.addWins.containsProduct(key)) {
@@ -234,16 +244,12 @@ public class ShoppingList {
             }
         }
 
-
         for (Map.Entry<String, Product> product : products.entrySet()) {
-
             if(this.getProducts().containsKey(product.getKey()) && list.getProducts().containsKey(product.getKey())){
                 product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
             }
         }
-
         if(this.deleted || list.getDeleted()){
-            System.out.println("DELETED");
             this.deleted = true;
         }
     }
@@ -252,8 +258,8 @@ public class ShoppingList {
      * Saves the list to the server and local storage. <br>
      * Should be called everytime the list is modified.
      */
-    private void save() {
-        System.out.println("deleted is " + deleted);
+    public void save() {
+        Session.getSession().addShoppingList(this);
         Session.getConnector().writeList(this);
         saveToFile();
     }

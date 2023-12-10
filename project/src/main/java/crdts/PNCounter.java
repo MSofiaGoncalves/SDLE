@@ -63,4 +63,12 @@ public class PNCounter {
         dec.merge(other.dec);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PNCounter pnCounter)) return false;
+        return id.equals(pnCounter.id) &&
+                inc.equals(pnCounter.inc) &&
+                dec.equals(pnCounter.dec);
+    }
 }

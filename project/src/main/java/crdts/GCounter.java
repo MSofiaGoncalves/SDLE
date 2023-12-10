@@ -54,4 +54,12 @@ public class GCounter {
             counters.put(otherId, Math.max(otherCounter, counters.getOrDefault(otherId, 0)));
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GCounter gCounter)) return false;
+        return id.equals(gCounter.id) &&
+                counters.equals(gCounter.counters);
+    }
 }

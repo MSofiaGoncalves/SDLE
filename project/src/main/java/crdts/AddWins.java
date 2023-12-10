@@ -138,4 +138,14 @@ public class AddWins {
         this.set = newSet;
         this.cc.addAll(other.cc);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof AddWins addWins)) {
+            return false;
+        }
+        return this.set.equals(addWins.set);
+    }
 }

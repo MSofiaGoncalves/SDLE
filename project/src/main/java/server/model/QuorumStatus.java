@@ -67,7 +67,8 @@ public class QuorumStatus {
         }
         else{
             System.out.println("Entrou no mergeLists do QuorumStatus");
-            this.list.mergeLists(list);
+            list.mergeLists(this.list);
+            this.list = list;
         }
     }
 

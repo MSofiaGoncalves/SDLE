@@ -16,7 +16,6 @@ public class ServerConnector {
     private ZContext context;
     private ZMQ.Socket socket;
 
-    private Properties properties;
     private ConcurrentHashMap<String, ZMQ.Socket> nodes;
 
     /**
@@ -25,10 +24,10 @@ public class ServerConnector {
     public ServerConnector() {
         try {
             context = new ZContext();
-            initProperties();
-            initHosts();
             socket = context.createSocket(ZMQ.REQ);
-            for (String host : getProperty("nodes").split(";")) {
+            socket.setReqRelaxed(true);
+            socket.setSendTimeOut(2 * Integer.parseInt(Session.getSession().getProperty("refreshTime")));
+            for (String host : Session.getSession().getProperty("nodes").split(";")) {
                 socket.connect(host);
             }
         } catch (Exception e) {
@@ -44,7 +43,9 @@ public class ServerConnector {
         String request = String.format("{\"method\":\"write\", \"list\":%s}", new Gson().toJson(shoppingList));
         socket.send(request.getBytes(ZMQ.CHARSET), 0);
 
-        byte[] reply = socket.recv(0);
+        new Thread(() -> {
+            byte[] reply = socket.recv(0);
+        }).start();
     }
 
     /**
@@ -54,38 +55,20 @@ public class ServerConnector {
      */
     public ShoppingList readList(String id) {
         String request = String.format("{\"method\":\"read\", \"listId\":\"%s\"}", id);
-        socket.send(request.getBytes(ZMQ.CHARSET), 0);
+        socket.send(request.getBytes(ZMQ.CHARSET), ZMQ.NOBLOCK);
 
-        byte[] reply = socket.recv(0);
-        return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
-    }
+        ZMQ.Poller poller = context.createPoller(1);
+        poller.register(socket, ZMQ.Poller.POLLIN);
 
-    public String getProperty(String key) {
-        return properties.getProperty(key);
-    }
+        long timeout = 2 * Long.parseLong(Session.getSession().getProperty("refreshTime"));
 
-    private void initProperties() {
-        if (properties == null)
-            properties = new Properties();
-        final String filePath = "src/main/java/client/client.properties";
-        try {
-            properties.load(new FileInputStream(filePath));
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load properties file: " + filePath, e);
+        int pollResult = poller.poll(timeout);
+
+        if (pollResult == -1 || pollResult == 0) {
+            return null;
+        } else {
+            byte[] reply = socket.recv(0);
+            return new Gson().fromJson(new String(reply, ZMQ.CHARSET), ShoppingList.class);
         }
-    }
-
-    public void setProperty(String key, String value) {
-        properties.setProperty(key, value);
-    }
-
-
-    private void initHosts() {
-        if (getProperty("serverhost") == null) {
-            setProperty("serverhost", getProperty("serverhostdefault"));
-        }
-
-        String[] temp = getProperty("serverhost").split(":");
-        setProperty("serverPort", temp[temp.length - 1]);
     }
 }

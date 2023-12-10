@@ -4,26 +4,27 @@ import client.model.ShoppingList;
 import com.google.gson.Gson;
 
 import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.FileInputStream;
 import java.util.*;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Singleton class that holds the current session.
  */
 public class Session {
-    private HashMap<String, ShoppingList> lists;
+    private ConcurrentHashMap<String, ShoppingList> lists;
     private static Session instance;
     private static ServerConnector connector;
     public static String username;
+    private Properties properties;
+    ScheduledExecutorService refresher;
 
     public Session() {
-        lists = new HashMap<>();
-        connector = new ServerConnector();
+        initProperties();
+        lists = new ConcurrentHashMap<>();
     }
 
     public static ServerConnector getConnector() {
@@ -44,6 +45,7 @@ public class Session {
      * @return Newly created list object.
      */
     public ShoppingList createList(String name) {
+        stopRefresher();
         ShoppingList shoppingList = new ShoppingList(name);
         this.lists.put(shoppingList.getId(), shoppingList);
         return shoppingList;
@@ -60,18 +62,53 @@ public class Session {
      * @return The list with the given id.
      */
     public ShoppingList getList(String id) {
-
+        stopRefresher();
         ServerConnector connector = Session.getConnector();
         ShoppingList shoppingList = connector.readList(id);
         ShoppingList clientList = isLocalList(id);
         if(clientList != null && shoppingList != null){
-            clientList.mergeListsClient(shoppingList);
+            shoppingList.mergeListsClient(clientList);
             return clientList;
         }
         if (shoppingList != null) {
             this.lists.put(shoppingList.getId(), shoppingList);
         }
         return this.lists.get(id);
+    }
+
+    public ShoppingList getLocalList(String id) {
+        return this.lists.get(id);
+    }
+
+    /**
+     * Gets a list from the server or from local storage. <br>
+     * This method is asynchronous. Does not return the list but updates the map.
+     * @param id Id of the list to get.
+     */
+    public void startRefresher(String id) {
+        stopRefresher();
+        refresher = Executors.newScheduledThreadPool(1);
+        Runnable runnable = () -> {
+                ServerConnector connector = Session.getConnector();
+                ShoppingList shoppingList = connector.readList(id);
+                ShoppingList clientList = isLocalList(id);
+                if(clientList != null && shoppingList != null){
+                    shoppingList.mergeListsClient(clientList);
+                    this.lists.put(id, shoppingList);
+                }
+                if (shoppingList != null) {
+                    this.lists.put(shoppingList.getId(), shoppingList);
+                }
+                else {
+                    stopRefresher();
+                }
+        };
+        refresher.scheduleAtFixedRate(runnable, Long.parseLong(getProperty("refreshTime")), Long.parseLong(getProperty("refreshTime")), TimeUnit.MILLISECONDS);
+    }
+
+    public void stopRefresher() {
+        if (refresher == null) return;
+        refresher.shutdownNow();
     }
 
     /**
@@ -129,7 +166,7 @@ public class Session {
             throw new RuntimeException("Username already set");
         }
         username = name;
-        lists = loadListsFromFiles();
+        this.lists = new ConcurrentHashMap<>(loadListsFromFiles());
 
         Gson gson = new Gson();
         String json = gson.toJson(this);
@@ -154,6 +191,35 @@ public class Session {
         return instance;
     }
 
+<<<<<<< HEAD
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+    private void initProperties() {
+        if (properties == null)
+            properties = new Properties();
+        final String filePath = "src/main/java/client/client.properties";
+        try {
+            properties.load(new FileInputStream(filePath));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load properties file: " + filePath, e);
+        }
+        initHosts();
+    }
+
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
+    private void initHosts() {
+        if (getProperty("serverhost") == null) {
+            setProperty("serverhost", getProperty("serverhostdefault"));
+        }
+
+        String[] temp = getProperty("serverhost").split(":");
+        setProperty("serverPort", temp[temp.length - 1]);
+=======
     public List<ShoppingList> getActiveLists(){
             List<ShoppingList> activeLists = new ArrayList<>();
             for (Map.Entry<String, ShoppingList> entry : lists.entrySet()) {
@@ -162,5 +228,6 @@ public class Session {
                 }
             }
         return activeLists;
+>>>>>>> 0df5367a8abffa1a08e5186f135342c6d9ac323d
     }
 }

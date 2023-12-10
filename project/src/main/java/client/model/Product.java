@@ -3,6 +3,8 @@ package client.model;
 import crdts.GCounter;
 import crdts.PNCounter;
 
+import java.util.Objects;
+
 public class Product {
     private String name;
     public PNCounter pnCounter; // related with quantityBought
@@ -70,4 +72,13 @@ public class Product {
         return this.pnCounter;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Product that)) return false;
+
+        if (!Objects.equals(name, that.name)) return false;
+        if (!Objects.equals(pnCounter, that.pnCounter)) return false;
+        return Objects.equals(gCounter, that.gCounter);
+    }
 }
