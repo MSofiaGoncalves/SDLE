@@ -132,7 +132,6 @@ public class Database {
      * @return The collection of lists.
      */
     private MongoCollection<ShoppingList> getCollection() {
-        MongoCollection<ShoppingList> collection = database.getCollection("lists", ShoppingList.class).withCodecRegistry(codecRegistry);
-        return collection;
+        return database.getCollection("lists", ShoppingList.class).withCodecRegistry(codecRegistry);
     }
 }

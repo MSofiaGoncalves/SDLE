@@ -56,6 +56,7 @@ public class NodeHandler implements Runnable {
         functionMap.put("statusUpdate", this::statusUpdate);
         functionMap.put("hintedHandoff", this::hintedHandoff);
         functionMap.put("returnHinted", this::returnHinted);
+        functionMap.put("handoff", this::handoff);
         functionMap.put("heartbeat", this::heartbeat);
         functionMap.put("heartbeatReply", this::heartbeatReply);
 
@@ -232,11 +233,27 @@ public class NodeHandler implements Runnable {
     }
 
     /**
+     * Receive lists to be relocated from another node. <br>
+     * This is done if this node just entered the grid.
+     */
+    private Void handoff(Void unused) {
+        Store.getLogger().info("Received handoff from node: " + address + " (" + message.getLists().size() + " lists)");
+        for (ShoppingList list : message.getLists()) {
+            Database.getInstance().insertList(list);
+        }
+        return null;
+    }
+
+    /**
      * Receive a heartbeat from another node. <br>
      * Sends a reply and updates the status of the node on the hash ring.
      */
     private Void heartbeat(Void unused) {
         Store.getLogger().info("Received heartbeat request from " + address);
+        if (!Store.getInstance().getNodes().contains(address)) {
+            Store.getInstance().addNode(address);
+            Store.getLogger().info("New node added: " + address);
+        }
         new NodeConnector(address).sendHeartbeatReply();
         Store.getInstance().getHashRing().updateNodeStatus(address, true);
         return null;

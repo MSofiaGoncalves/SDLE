@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -176,6 +177,11 @@ public class Store {
         return logger;
     }
 
+    public void addNode(String node) {
+        nodes.add(node);
+        nodeBroker.connect(node);
+    }
+
     /**
      * Loads the properties file.
      */
@@ -217,7 +223,7 @@ public class Store {
      * Inter-node communication is done using ROUTER-ROUTER sockets.
      */
     private void connectNodes() {
-        nodes = List.of(getProperty("nodes").split(";"));
+        nodes = new ArrayList<>(List.of(getProperty("nodes").split(";")));
         nodeBroker = context.createSocket(ZMQ.ROUTER);
         nodeBroker.bind(getProperty("nodehost"));
         nodeBroker.setIdentity(getProperty("nodehost").getBytes(ZMQ.CHARSET));
