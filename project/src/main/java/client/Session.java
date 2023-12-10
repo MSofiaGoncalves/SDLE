@@ -191,7 +191,6 @@ public class Session {
         return instance;
     }
 
-<<<<<<< HEAD
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
@@ -219,7 +218,8 @@ public class Session {
 
         String[] temp = getProperty("serverhost").split(":");
         setProperty("serverPort", temp[temp.length - 1]);
-=======
+    }
+
     public List<ShoppingList> getActiveLists(){
             List<ShoppingList> activeLists = new ArrayList<>();
             for (Map.Entry<String, ShoppingList> entry : lists.entrySet()) {
@@ -228,6 +228,6 @@ public class Session {
                 }
             }
         return activeLists;
->>>>>>> 0df5367a8abffa1a08e5186f135342c6d9ac323d
+
     }
 }
