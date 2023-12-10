@@ -72,7 +72,6 @@ public class Product {
         return this.pnCounter;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

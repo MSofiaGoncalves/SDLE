@@ -29,13 +29,15 @@ public class ShoppingList {
 
     private AddWins addWins;
 
+    public boolean deleted;
+
     public ShoppingList(String name) {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(this.id);
+        this.deleted = false;
         save();
-
     }
 
     public ShoppingList(String id, String name) {
@@ -43,9 +45,17 @@ public class ShoppingList {
         this.name = name;
         this.products = new HashMap<>();
         this.addWins = new AddWins(this.id);
+        this.deleted = false;
         saveToFile();
     }
 
+    public void setDeleted(boolean deleted){
+        this.deleted = deleted;
+    }
+
+    public boolean getDeleted(){
+        return deleted;
+    }
 
     public String getId() {
         return this.id;
@@ -175,16 +185,18 @@ public class ShoppingList {
         String username = Session.getSession().getUsername();
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        System.out.println("Json: " + json);
+        System.out.println("Current list: " + json);
         String directoryPath = "src/main/java/client/lists/" + username + "/";
         String fileName = directoryPath + this.id + ".json";
-        System.out.println("Username: " + username + "file: " + fileName);
+
+        System.out.println("deleted here: " + this.deleted);
 
         try {
             Path path = Paths.get(fileName);
             System.out.println("path: " + path);
             File directory = path.getParent().toFile();
             System.out.println("directory: " + directory);
+
             if (!directory.exists()) {
                 directory.mkdirs();
             }
@@ -207,89 +219,21 @@ public class ShoppingList {
         }
     }
 
-    public void removeFromFile() {
-        String username = Session.getSession().getUsername();
-        String directoryPath = "src/main/java/client/lists/" + username + "/";
-        String fileName = directoryPath + this.id + ".json";
-
-        CompletableFuture<Void> future = new CompletableFuture<>();
-
-        try {
-            Path path = Paths.get(fileName);
-            File file = path.toFile();
-
-            if (file.exists()) {
-                CompletableFuture.runAsync(() -> {
-                    if (file.delete()) {
-                        System.out.println("File deleted successfully: " + fileName);
-                        future.complete(null);
-                    } else {
-                        System.out.println("Failed to delete file: " + fileName);
-                        future.completeExceptionally(new RuntimeException("Failed to delete file: " + fileName));
-                    }
-                });
-            } else {
-                System.out.println("File does not exist: " + fileName);
-                future.complete(null);
-            }
-        } catch (Exception e) {
-            System.out.println("Error removing file: " + e.getMessage());
-            future.completeExceptionally(e);
-        }
-
-
-    }
-
-    // Define a custom CompletionHandler
-    private class MyCompletionHandler implements java.nio.channels.CompletionHandler<Integer, Void> {
-        private final AsynchronousFileChannel fileChannel;
-        private final String fileName;
-
-        public MyCompletionHandler(AsynchronousFileChannel fileChannel, String fileName) {
-            this.fileChannel = fileChannel;
-            this.fileName = fileName;
-        }
-
-        @Override
-        public void completed(Integer result, Void attachment) {
-            try {
-                // Close the file channel
-                fileChannel.close();
-                System.out.println("File deleted successfully: " + fileName);
-            } catch (Exception e) {
-                System.out.println("Error closing file channel: " + e.getMessage());
-            }
-        }
-
-        @Override
-        public void failed(Throwable exc, Void attachment) {
-            System.out.println("Failed to remove file: " + fileName + ", Error: " + exc.getMessage());
-        }
-    }
-
-
 
     public AddWins getAddWins() {
         return addWins;
     }
 
-    //@Override
-    /*public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ShoppingList{id='").append(id).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", products=").append(products);
-        sb.append(", addWins=").append(addWins);
-        sb.append('}');
-        return sb.toString();
-    }*/
+    public void deleteList(){
+        this.deleted = true;
+        this.save();
+    }
 
     public void mergeListsClient(ShoppingList list){
         this.addWins.join(list.getAddWins());
         Set<String> keySet = this.products.keySet();
         for(String key : keySet){
             if(!this.addWins.containsProduct(key)) {
-                System.out.println("A remover produto: " + key);
                 this.deleteProduct(key);
             }
         }
@@ -305,19 +249,19 @@ public class ShoppingList {
                 product.getValue().mergeProduct(list.getProducts().get(product.getKey()));
             }
         }
+        if(this.deleted || list.getDeleted()){
+            this.deleted = true;
+        }
     }
 
     /**
      * Saves the list to the server and local storage. <br>
      * Should be called everytime the list is modified.
      */
-    private void save() {
+    public void save() {
         Session.getSession().addShoppingList(this);
         Session.getConnector().writeList(this);
-        System.out.println("save");
-        System.out.println(this.getProducts());
         saveToFile();
-        System.out.println("finished save to file");
     }
 
 }

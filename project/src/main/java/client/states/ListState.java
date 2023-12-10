@@ -22,18 +22,24 @@ public class ListState implements State {
     }
 
     public State step() {
-        if (shoppingList == null) { //When the option to open a list by ID is used
+        if (shoppingList == null) { // When the option to open a list by ID is used
             System.out.print("List id: ");
             Scanner in = new Scanner(System.in);
             String listId = in.nextLine();
             this.shoppingList = Session.getSession().getList(listId);
-            if (this.shoppingList == null) { // non existent
+            if (this.shoppingList == null || this.shoppingList.getDeleted()) { // non existent
                 System.out.println("List does not exist.");
                 return new HubState();
             }
         }
         shoppingList = Session.getSession().getLocalList(shoppingList.getId());
+        shoppingList.save();
         Session.getSession().startRefresher(shoppingList.getId());
+
+        if(this.shoppingList.getDeleted()){
+            System.out.println("List does not exist.");
+            return new HubState();
+        }
 
         breakLn();
         printTitle("List " + shoppingList.getName());

@@ -135,6 +135,7 @@ public class Session {
             if (files != null) {
                 for (File file : files) {
                     ShoppingList list = ShoppingList.loadFromFile(file.getAbsolutePath());
+                    System.out.println("IS DELETED = " + list.getDeleted());
                     if (list != null) {
                         shoppingLists.put(list.getId(), list);
                     }
@@ -169,9 +170,9 @@ public class Session {
 
         Gson gson = new Gson();
         String json = gson.toJson(this);
-        System.out.println("Json: " + json);
+
         String directoryPath = "src/main/java/client/lists/" + username + "/";
-        System.out.println("Directory created!: " + directoryPath);
+
         try {
             File directory = new File(directoryPath);
             if (!directory.exists()) {
@@ -190,6 +191,7 @@ public class Session {
         return instance;
     }
 
+<<<<<<< HEAD
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
@@ -217,5 +219,15 @@ public class Session {
 
         String[] temp = getProperty("serverhost").split(":");
         setProperty("serverPort", temp[temp.length - 1]);
+=======
+    public List<ShoppingList> getActiveLists(){
+            List<ShoppingList> activeLists = new ArrayList<>();
+            for (Map.Entry<String, ShoppingList> entry : lists.entrySet()) {
+                if(!entry.getValue().getDeleted()){
+                    activeLists.add(entry.getValue());
+                }
+            }
+        return activeLists;
+>>>>>>> 0df5367a8abffa1a08e5186f135342c6d9ac323d
     }
 }

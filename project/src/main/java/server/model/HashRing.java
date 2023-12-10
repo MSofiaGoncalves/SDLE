@@ -90,6 +90,10 @@ public class HashRing {
      * @param status The new status of the node. True if online, false otherwise.
      */
     public void updateNodeStatus(String node, boolean status) {
+        if (!nodeStatus.containsKey(node)) {
+            addNewNode(node);
+            return;
+        }
         if (nodeStatus.get(node) == status) return;
         if (status) {
             returnLists(node);
@@ -228,5 +232,20 @@ public class HashRing {
             }
         }
         new NodeConnector(node).sendReturnHinted(toSend);
+    }
+
+    private void addNewNode(String node) {
+        addNode(node);
+        nodeStatus.put(node, true);
+        List<ShoppingList> lists = Database.getInstance().readAllLists();
+        List<ShoppingList> toSend = new ArrayList<>();
+        for (ShoppingList list : lists) {
+            List<String> nodes = getNodes(list.getId(), replicas);
+            if (nodes.contains(node)) {
+                toSend.add(list);
+            }
+        }
+
+        new NodeConnector(node).sendHandoff(toSend);
     }
 }
